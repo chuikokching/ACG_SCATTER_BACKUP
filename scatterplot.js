@@ -53,7 +53,7 @@ var jsonList_copy={};
 var jsonArray_all=[];
 var jsonList_temp={};
 // load data
-d3.csv("https://gist.githubusercontent.com/chuikokching/73772b5eda16720151f4f1b8c1ace8c1/raw/8663d64822c35b6cee52c34563fa76b3deccbf75/student_GPA_1.csv").then(function(data) {
+d3.csv("https://gist.githubusercontent.com/chuikokching/b0d0a6f6737e99beaf307281519c0197/raw/01bbd9c13d3fb67ab71e9fc4adc50e7cb4d6adb6/student_GPA_2.csv").then(function(data) {
     console.log(data.columns[0]+ " "+data.columns[1]+ " "+data.columns[2]);
 
     jsonList_copy=data;
@@ -167,15 +167,25 @@ function unique(arr) {
 }
 
 //traverse array
-function print(arr)
+function print(jsonList)
 {
     var text=" This chart compares ";
-    for(var i=0;i<arr.length ;i++)
+    for(var i=0;i<jsonList.length ;i++)
     {
-       text=text+ arr[i] +" "
+       text=text+ jsonList[i].var +" "
     }
-    text=text+"'s "+ x_axis_title + " and "+ y_axis_title+ "." + " These two variables have a positive association because as "+ x_axis_title +" increases, so does "+ y_axis_title+"." +"<br/>"+"<br/>"
+    text=text+"'s "+ x_axis_title + " and "+ y_axis_title+ "." +
+     " These two variables have a "+ 
+     correlation_coefficient(jsonArray_all[0].x_array,jsonArray_all[0].y_array) +" when the variables are "+ legend_var + 
+     ", because as "+ x_axis_title +" increases, so does "+ y_axis_title+". " 
     return text;
+}
+
+
+//k-means clustering
+function k_means()
+{
+
 }
 
 //correlation value r
@@ -339,7 +349,7 @@ $("#submit").on("click",function(){
             +
             "The moderate linear relationship occurs when the slope is 0.5 < r < 0.7. There is a moderately linear relationship between the " + x_axis_title + " and "+ y_axis_title +" for "+ legend_var.length+ " variables."+"<br/>"+"<br/>"
             +
-            "There are no outliers were detected in these two sets of "+ x_axis_title + " and "+ y_axis_title +" for "+ legend_var.length+ " variables. "+"<br/>"+"<br/>"
+            "There are no outliers were detected in these two sets of "+ x_axis_title + " and "+ y_axis_title +" for "+ legend_var+ " variables. "+"<br/>"+"<br/>"
             +
             "In general, the higher values of "+x_axis_title+", the larger the values of "+y_axis_title+ ", because the relationship between them is linear and positive."+ "<br/>"+"<br/>"
             +
@@ -348,7 +358,7 @@ $("#submit").on("click",function(){
 
     }
 
-    if(variables=="role")
+    if(variables=="role_1")
     {//0.62
         legend_var = unique(legend_var);
 
@@ -372,8 +382,6 @@ $("#submit").on("click",function(){
             x_array=[];
             y_array=[];
         }
-        //console.log(jsonArray_all[0].x_array + " \n " + jsonArray_all[0].y_array);
-        //console.log(average(jsonArray_all[0].x_array) + " "+average(jsonArray_all[0].y_array));
 
         //var a=[17,13,12,15,16,14,16,16,18,19];
         //var b=[94,73,59,80,93,85,66,79,77,91];
@@ -384,13 +392,13 @@ $("#submit").on("click",function(){
             "In this chart, the relationship between "+ x_axis_title +" and "+ y_axis_title +" for "+ legend_var + " is being investigated. "+ 
             x_axis_title + " can range from "+ min_x() + " to "+ max_x() +" and "+ y_axis_title + " in this chart range from "+ min_y() + " to "+ max_y() +". Individuals in this table were ordered based on their "+x_axis_title + "."+"<br/>"+"<br/>"
             +
-            print(legend_var)
+            print(jsonArray_all)
             +
-            "This chart illustrates a linear relationship. This means that the points on the scatterplot closely resemble a straight line."+"<br/>"+"<br/>"
+            "This means that the points on the scatterplot closely resemble a straight line."+"<br/>"+"<br/>"
             +
-            "The moderate linear relationship occurs when the slope is 0.5 < r < 0.7. There is a moderately linear relationship between the " + x_axis_title + " and "+ y_axis_title +" for "+ legend_var.length+ " variables."+"<br/>"+"<br/>"
+            "The moderate linear relationship occurs when the slope of r value is 0.5 < r < 0.7. There is a moderately linear relationship between the " + x_axis_title + " and "+ y_axis_title +" for "+ legend_var+ " variables."+"<br/>"+"<br/>"
             +
-            "There is a outlier were detected (2,100) in these two sets of "+ x_axis_title + " and "+ y_axis_title +" for "+ legend_var.length+ " variables. "+"<br/>"+"<br/>"
+            "There is a outlier were detected (2,100) in these two sets of "+ x_axis_title + " and "+ y_axis_title +" for "+ legend_var+ " variables. "+"<br/>"+"<br/>"
             +
             "In general, the higher values of "+x_axis_title+", the larger the values of "+y_axis_title+ ", because the relationship between them is linear and positive."+ "<br/>"+"<br/>"
             +
@@ -398,55 +406,6 @@ $("#submit").on("click",function(){
         );
     }
 
-    if(variables=="role_1")
-    {
-        legend_var = unique(legend_var);
-        $(".description").html("Descriptions: "+"<br/>"+"<br/>"
-            +
-            "In this chart, the relationship between "+ x_axis_title +" and "+ y_axis_title +" for "+ legend_var + " is being investigated."+"<br/>"+"<br/>"
-            +
-            x_axis_title + " can range from 0 to 4 and " + y_axis_title + " in this chart range from 0 to 10. Individuals in this table were ordered based on their "+x_axis_title + "."+"<br/>"+"<br/>"
-            +
-            //print(legend_var)
-            x_axis_title + " and "+ y_axis_title+ "." + " These two variables have a negative association because as "+ x_axis_title +" decreases, so does "+ y_axis_title+"." +"<br/>"+"<br/>"
-            +
-            "This chart illustrates a linear relationship. This means that the points on the scatterplot closely resemble a straight line."+"<br/>"+"<br/>"
-            +
-            "The strong linear relationship occurs when the slope is r < -0.7. There is a strong linear relationship between the " + x_axis_title + " and "+ y_axis_title +" for "+ legend_var.length+ " variables."+"<br/>"+"<br/>"
-            +
-            "There are no outliers were detected in these two sets of "+ x_axis_title + " and "+ y_axis_title +" for "+ legend_var.length+ " variables. "+"<br/>"+"<br/>"
-            +
-            "In general, the higher values of "+x_axis_title+", the smaller the values of "+y_axis_title+ ", because the relationship between them is linear and negative."+ "<br/>"+"<br/>"
-            +
-            "<br/>"
-        );
-    }
-
-    if(variables=="role_2")
-    {
-        legend_var = unique(legend_var);
-        $(".description").html("Descriptions: "+"<br/>"+"<br/>"
-            +
-            "In this chart, the relationship between "+ x_axis_title +" and "+ y_axis_title +" for "+ legend_var + " is being investigated."+"<br/>"+"<br/>"
-            +
-            x_axis_title + " can range from 0 to 90 and " + y_axis_title + " in this chart range from 0 to 15. Individuals in this table were ordered based on their "+x_axis_title + "."+"<br/>"+"<br/>"
-            +
-            //print(legend_var)
-            x_axis_title + " and "+ y_axis_title+ "." + " These two variables have a null because as "+ x_axis_title +" decreases, so does "+ y_axis_title+"." +"<br/>"+"<br/>"
-            +
-            "This chart illustrates a non-linear relationship. This means that the points on the scatterplot don't closely resemble a straight line."+"<br/>"+"<br/>"
-            +
-            "The null relationship occurs when the slope is null There is a null relationship between the " + x_axis_title + " and "+ y_axis_title +" for "+ legend_var.length+ " variables."+"<br/>"+"<br/>"
-            +
-            "There are no outliers were detected in these two sets of "+ x_axis_title + " and "+ y_axis_title +" for "+ legend_var.length+ " variables. "+"<br/>"+"<br/>"
-            +
-            "In general, the higher values of "+x_axis_title+", the smaller the values of "+y_axis_title+ ", because the relationship between them is null."+ "<br/>"+"<br/>"+
-
-            "In this chart " +y_axis_title + " increases throughout 0-40 and remains steady in 40-50, and begins decreasing around age 50."
-            +
-            "<br/>"
-        );
-    }
 
 
     /*$.ajax({
