@@ -53,7 +53,7 @@ var jsonList_copy={};
 var jsonArray_all=[];
 var jsonList_temp={};
 // load data
-d3.csv("https://gist.githubusercontent.com/chuikokching/b0d0a6f6737e99beaf307281519c0197/raw/01bbd9c13d3fb67ab71e9fc4adc50e7cb4d6adb6/student_GPA_2.csv").then(function(data) {
+d3.csv("https://gist.githubusercontent.com/chuikokching/69d365874ae985df3fc3161a3bf7e1b1/raw/004a22af207396ee4ce2c61334e5686e79201d2b/disaster.csv").then(function(data) {
     console.log(data.columns[0]+ " "+data.columns[1]+ " "+data.columns[2]);
 
     jsonList_copy=data;
@@ -96,10 +96,10 @@ d3.csv("https://gist.githubusercontent.com/chuikokching/b0d0a6f6737e99beaf307281
 
     //create color scale
     var cValue = function(d) {
-        
+    
         legend_var.push(d[variables]);
         return d[variables];},
-        colors = d3.scaleOrdinal(d3.schemePaired);
+        colors = d3.scaleOrdinal(d3.schemeCategory10);
          
      
     // draw dots
@@ -107,7 +107,7 @@ d3.csv("https://gist.githubusercontent.com/chuikokching/b0d0a6f6737e99beaf307281
         .data(data)
         .enter().append("circle")
         .attr("class", "dot")
-        .attr("r", 3)
+        .attr("r", 5)
         .attr("cx", xMap)
         .attr("cy", yMap)
         .style("fill", function(d) {return colors(cValue(d)); })
@@ -132,13 +132,13 @@ d3.csv("https://gist.githubusercontent.com/chuikokching/b0d0a6f6737e99beaf307281
         .data(colors.domain())
         .enter().append("g")
         .attr("class", "legend")
-        .attr("transform", function(d, i) { return "translate(0," + i * 15 + ")"; });
+        .attr("transform", function(d, i) { return "translate(10," + (i+1) * 15 + ")"; });
 
     // draw legend colored rectangles
     legend.append("rect")
         .attr("x", width )
-        .attr("width", 8)
-        .attr("height", 7)
+        .attr("width", 13)
+        .attr("height", 12)
         .style("fill", colors);
 
     // draw legend text
@@ -167,17 +167,68 @@ function unique(arr) {
 }
 
 //traverse array
-function print(jsonList)
+function print()
 {
-    var text=" This chart compares ";
-    for(var i=0;i<jsonList.length ;i++)
+    var var_linear=[];
+    var var_non_linear=[];
+    var var_positive=[];
+    var var_negative=[];
+    var text=" This chart compares <b>"+ legend_var+"</b> 's <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b>.";
+    for(var i=0;i<jsonArray_all.length;i++)
     {
-       text=text+ jsonList[i].var +" "
+        if(correlation_coefficient_linear(jsonArray_all[i].x_array,jsonArray_all[i].y_array)=="linear")
+        {
+            var_linear.push(jsonArray_all[i].var);
+            if(correlation_coefficient_association(jsonArray_all[i].x_array,jsonArray_all[i].y_array)=="positive")
+                var_positive.push(jsonArray_all[i].var);
+            else
+                var_negative.push(jsonArray_all[i].var);
+        } 
+        else
+        {
+            var_non_linear.push(jsonArray_all[i].var);
+        }
     }
-    text=text+"'s "+ x_axis_title + " and "+ y_axis_title+ "." +
-     " These two variables have a "+ 
-     correlation_coefficient(jsonArray_all[0].x_array,jsonArray_all[0].y_array) +" when the variables are "+ legend_var + 
-     ", because as "+ x_axis_title +" increases, so does "+ y_axis_title+". " 
+
+    console.log(var_positive);
+    console.log(var_negative);
+    if(var_linear.length!=0)
+    {     
+        if(var_positive.length!=0)
+        {
+            text=text +" These two variables have a <b>linear positive</b> ";
+            for(var k=0;k<var_positive.length;k++)
+            {
+                for(var z=0;z<jsonArray_all.length;z++)
+                {
+                    if(var_positive[k]==jsonArray_all[z].var)
+                    {
+                        text=text+"<b>" +correlation_coefficient_strength(jsonArray_all[z].x_array,jsonArray_all[z].y_array)+"</b>," 
+                    }
+                }
+                
+            } 
+            text= text + " relationship, when the Individuals are <b>"+ var_positive + "</b>, because as <b>"+ x_axis_title +"</b> increases, so does <b>"+ y_axis_title+"</b>. "
+        }
+        if(var_negative.length!=0)
+        {
+            text=text +" These two variables have a <b>linear negative</b> ";
+            for(var k=0;k<var_negative.length;k++)
+            {
+                for(var z=0;z<jsonArray_all.length;z++)
+                {
+                    if(var_negative[k]==jsonArray_all[z].var)
+                    {
+                        text=text+"<b>"+ correlation_coefficient_strength(jsonArray_all[z].x_array,jsonArray_all[z].y_array)+"</b>," 
+                    }
+                }
+                
+            } 
+            text= text + " when the Individuals are <b>"+ var_negative + "</b>, because as <b>"+ x_axis_title +"</b> decreases, so does <b>"+ y_axis_title+"</b>. "
+        }
+        text=text+"This means that the points on the scatterplot closely resemble a straight line."+"<br/>"+"<br/>"
+    }
+ 
     return text;
 }
 
@@ -187,6 +238,81 @@ function k_means()
 {
 
 }
+
+//correlation value r
+function correlation_coefficient_linear(arr_x,arr_y)
+{
+    if(arr_x.length!=arr_y.length)
+        return "Error, length of array doesn't match!"
+    else
+    {
+        var r=correlation_coefficient(arr_x,arr_y);
+
+        if(r>=0)
+        {
+            if(r<0.3)
+                return "none relationship"; 
+            else
+                return "linear";
+        }
+        else{
+            if(r>-0.3)
+                return "none relationship";
+
+            else
+                return "linear";
+        }  
+    }
+}
+
+//correlation value r
+function correlation_coefficient_association(arr_x,arr_y)
+{
+    if(arr_x.length!=arr_y.length)
+        return "Error, length of array doesn't match!"
+    else
+    {
+        var r=correlation_coefficient(arr_x,arr_y);
+
+        if(r>0)
+        {
+            return "positive";
+        }
+        else{
+            return "negative";
+        }  
+    }
+}
+
+//correlation value r
+function correlation_coefficient_strength(arr_x,arr_y)
+{
+    if(arr_x.length!=arr_y.length)
+        return "Error, length of array doesn't match!"
+    else
+    {
+        var r=correlation_coefficient(arr_x,arr_y);
+
+        if(r>=0)
+        {
+            if((0.3<=r&&r<0.5))
+                return "weak";
+            if((0.5<=r&&r<0.7))
+                return "moderate";
+            if((r>=0.7))
+                return "strong";
+        }
+        else{
+            if((r<=-0.3&&r>-0.5))
+                return "weak";
+            if((r<=-0.5&&r>-0.7))
+                return "moderate";
+            if((r<=-0.7))
+                return "strong";
+        }  
+    }
+}
+
 
 //correlation value r
 function correlation_coefficient(arr_x,arr_y)
@@ -223,28 +349,8 @@ function correlation_coefficient(arr_x,arr_y)
         //console.log(sum_x + " :::: "+ sum_y);
 
         r=(sum/Math.sqrt(sum_x*sum_y)).toFixed(3);
-        console.log(r + " value of r");
-        if(r>=0)
-        {
-            if(r<0.3)
-                return "none relationship";
-            if((0.3<=r&&r<0.5))
-                return "weak positive linear relationship";
-            if((0.5<=r&&r<0.7))
-                return "moderate positive linear relationship";
-            if((r>=0.7))
-                return "strong positive linear relationship";
-        }
-        else{
-            if(r>-0.3)
-                return "none relationship";
-            if((r<=-0.3&&r>-0.5))
-                return "weak negative linear relationship";
-            if((r<=-0.5&&r>-0.7))
-                return "moderate negative linear relationship";
-            if((r<=-0.7))
-                return "strong negative linear relationship";
-        }  
+        //console.log(r + " value of r");
+        return r;
     }
 }
 
@@ -303,7 +409,6 @@ function min_y(){
     var min = jsonList_copy[0][y_axis_title];
     for(let j=0;j<jsonList_copy.length;j++)
     {
-        //console.log(min+" , " + jsonList_copy[j][y_axis_title]);
         if(parseFloat(jsonList_copy[j][y_axis_title])<min)
         {
             min=jsonList_copy[j][y_axis_title];
@@ -334,40 +439,16 @@ $("#submit").on("click",function(){
         "array":jsonList_copy
     };*/
 
-    if(variables=="Region")
-    {
-        
-        $(".description").html("Descriptions: "+"<br/>"+"<br/>"
-            +
-            "In this chart, the relationship between "+ x_axis_title +" and "+ y_axis_title +" for "+ legend_var + " is being investigated."+"<br/>"+"<br/>"
-            +
-            x_axis_title + " can range from 0 to 80000 and " + y_axis_title + " in this chart range from 0 to 90. Individuals in this table were ordered based on their "+x_axis_title + "."+"<br/>"+"<br/>"
-            +
-            print(legend_var)
-            +
-            "This chart illustrates a linear relationship. This means that the points on the scatterplot closely resemble a straight line."+"<br/>"+"<br/>"
-            +
-            "The moderate linear relationship occurs when the slope is 0.5 < r < 0.7. There is a moderately linear relationship between the " + x_axis_title + " and "+ y_axis_title +" for "+ legend_var.length+ " variables."+"<br/>"+"<br/>"
-            +
-            "There are no outliers were detected in these two sets of "+ x_axis_title + " and "+ y_axis_title +" for "+ legend_var+ " variables. "+"<br/>"+"<br/>"
-            +
-            "In general, the higher values of "+x_axis_title+", the larger the values of "+y_axis_title+ ", because the relationship between them is linear and positive."+ "<br/>"+"<br/>"
-            +
-            "<br/>"
-        );
-
-    }
-
-    if(variables=="role_1")
-    {//0.62
         legend_var = unique(legend_var);
-
-        //console.log(legend_var);
+        
         var txt = legend_var[0];
-        for(let i=0;i<legend_var.length;i++)
+
+        for(let i=1;i<=legend_var.length;i++)
         {
+            
             for(let j=0;j<jsonList_copy.length;j++)
             {
+                
                 if(txt==jsonList_copy[j][variables])
                 {
                     x_array.push(jsonList_copy[j][x_axis_title]);
@@ -378,6 +459,7 @@ $("#submit").on("click",function(){
             jsonList_temp["x_array"]=x_array;
             jsonList_temp["y_array"]=y_array;
             jsonArray_all.push(jsonList_temp);
+            jsonList_temp={};
             txt=legend_var[i];
             x_array=[];
             y_array=[];
@@ -385,28 +467,24 @@ $("#submit").on("click",function(){
 
         //var a=[17,13,12,15,16,14,16,16,18,19];
         //var b=[94,73,59,80,93,85,66,79,77,91];
-        console.log(correlation_coefficient(jsonArray_all[0].x_array,jsonArray_all[0].y_array));
+        console.log(jsonArray_all);
 
         $(".description").html("Descriptions: "+"<br/>"+"<br/>"
             +
-            "In this chart, the relationship between "+ x_axis_title +" and "+ y_axis_title +" for "+ legend_var + " is being investigated. "+ 
-            x_axis_title + " can range from "+ min_x() + " to "+ max_x() +" and "+ y_axis_title + " in this chart range from "+ min_y() + " to "+ max_y() +". Individuals in this table were ordered based on their "+x_axis_title + "."+"<br/>"+"<br/>"
+            "In this chart, the relationship between <b>"+ x_axis_title +"</b> and <b>"+ y_axis_title +"</b> for <b>"+ legend_var + "</b> is being investigated. <b>"+ 
+            x_axis_title + "</b> can range from <b>"+ min_x() + "</b> to <b>"+ max_x() +"</b> and <b>"+ y_axis_title + "</b> in this chart range from <b>"+ min_y() + "</b> to <b>"+ max_y() +"</b>. Individuals in this table were ordered based on their <b>"+x_axis_title + "</b>."+"<br/>"+"<br/>"
             +
-            print(jsonArray_all)
+            print()
             +
-            "This means that the points on the scatterplot closely resemble a straight line."+"<br/>"+"<br/>"
+            "Outliers:" + "<br/>"+"<br/>"
+            +   
+            "Clustering:" + "<br/>"+"<br/>"
             +
-            "The moderate linear relationship occurs when the slope of r value is 0.5 < r < 0.7. There is a moderately linear relationship between the " + x_axis_title + " and "+ y_axis_title +" for "+ legend_var+ " variables."+"<br/>"+"<br/>"
-            +
-            "There is a outlier were detected (2,100) in these two sets of "+ x_axis_title + " and "+ y_axis_title +" for "+ legend_var+ " variables. "+"<br/>"+"<br/>"
-            +
-            "In general, the higher values of "+x_axis_title+", the larger the values of "+y_axis_title+ ", because the relationship between them is linear and positive."+ "<br/>"+"<br/>"
+            "Predictions:In general, the higher values of "+x_axis_title+", the larger the values of "+y_axis_title+ ", because the relationship between them is linear and positive."+ "<br/>"+"<br/>"
             +
             "<br/>"
         );
-    }
-
-
+    
 
     /*$.ajax({
       type :"POST",

@@ -1,7 +1,17 @@
 1. paragraph first of 2 sentences
-2. relationship correlation
+2. relationship correlation(improve)
 3. outliers
 4. clustering
 5. predictions
 
 
+remove order
+
+if there is a linear relationship or not , no relationship (interesting)
+no need to correlation for every variables ,  max strong correlation , min weak correlation
+
+what if outliers, describe it (value life or income) what is outliers (regression analysis)
+
+cluster() 4.1 paple related to clustering
+
+don't look for time as dimension
