@@ -2,7 +2,6 @@
 2. relationship correlation(improve)
 3. outliers
 4. clustering
-5. predictions
 
 
 remove order
@@ -14,4 +13,18 @@ what if outliers, describe it (value life or income) what is outliers (regressio
 
 cluster() 4.1 paple related to clustering
 
-don't look for time as dimension
+don't look for dataset time as dimension
+
+
+Outliers:
+
+1.Z-SCORE
+2.IOR
+3.Regression analysis
+
+
+k-means Unsupervised Algorithms: to discover groups of things, people, or ideas that are closely related to each other.
+
+
+
+

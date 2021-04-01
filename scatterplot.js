@@ -53,7 +53,7 @@ var jsonList_copy={};
 var jsonArray_all=[];
 var jsonList_temp={};
 // load data
-d3.csv("https://gist.githubusercontent.com/chuikokching/69d365874ae985df3fc3161a3bf7e1b1/raw/004a22af207396ee4ce2c61334e5686e79201d2b/disaster.csv").then(function(data) {
+d3.csv("https://gist.githubusercontent.com/chuikokching/73772b5eda16720151f4f1b8c1ace8c1/raw/8663d64822c35b6cee52c34563fa76b3deccbf75/student_GPA_1.csv").then(function(data) {
     console.log(data.columns[0]+ " "+data.columns[1]+ " "+data.columns[2]);
 
     jsonList_copy=data;
@@ -171,18 +171,21 @@ function print()
 {
     var var_linear=[];
     var var_non_linear=[];
-    var var_positive=[];
-    var var_negative=[];
+    var var_strong=[];
+    var var_moderate=[];
+    var var_weak=[];
     var text=" This chart compares <b>"+ legend_var+"</b> 's <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b>.";
     for(var i=0;i<jsonArray_all.length;i++)
     {
         if(correlation_coefficient_linear(jsonArray_all[i].x_array,jsonArray_all[i].y_array)=="linear")
         {
             var_linear.push(jsonArray_all[i].var);
-            if(correlation_coefficient_association(jsonArray_all[i].x_array,jsonArray_all[i].y_array)=="positive")
-                var_positive.push(jsonArray_all[i].var);
-            else
-                var_negative.push(jsonArray_all[i].var);
+            if(correlation_coefficient_strength(jsonArray_all[i].x_array,jsonArray_all[i].y_array)=="strong")
+                var_strong.push(jsonArray_all[i].var);
+            if(correlation_coefficient_strength(jsonArray_all[i].x_array,jsonArray_all[i].y_array)=="weak")
+                var_weak.push(jsonArray_all[i].var);
+            if(correlation_coefficient_strength(jsonArray_all[i].x_array,jsonArray_all[i].y_array)=="moderate")
+                var_moderate.push(jsonArray_all[i].var);
         } 
         else
         {
@@ -190,47 +193,155 @@ function print()
         }
     }
 
-    console.log(var_positive);
-    console.log(var_negative);
+    console.log(var_strong + " strong");
+    console.log(var_moderate+ " moderate");
+    console.log(var_weak+ " weak");
+
     if(var_linear.length!=0)
     {     
-        if(var_positive.length!=0)
+        text=text +" There is a <b>linear relationship</b> in this dataset, their degree of strength relationship corresponding to individuals will be described as follows: </br>";
+        if(var_strong.length!=0)
         {
-            text=text +" These two variables have a <b>linear positive</b> ";
-            for(var k=0;k<var_positive.length;k++)
+            text=text +"Strong: ";
+            for(let k=0;k<var_strong.length;k++)
             {
-                for(var z=0;z<jsonArray_all.length;z++)
-                {
-                    if(var_positive[k]==jsonArray_all[z].var)
-                    {
-                        text=text+"<b>" +correlation_coefficient_strength(jsonArray_all[z].x_array,jsonArray_all[z].y_array)+"</b>," 
-                    }
-                }
-                
-            } 
-            text= text + " relationship, when the Individuals are <b>"+ var_positive + "</b>, because as <b>"+ x_axis_title +"</b> increases, so does <b>"+ y_axis_title+"</b>. "
+                text=text+"<b>" +var_strong[k]+"</b>.  "             
+            }
+            text=text +"</br> ";
         }
-        if(var_negative.length!=0)
+        else{
+            text=text +"Strong: null</br>";
+        }
+
+        if(var_moderate.length!=0)
         {
-            text=text +" These two variables have a <b>linear negative</b> ";
-            for(var k=0;k<var_negative.length;k++)
+            text=text +"Moderate: ";
+            for(let k=0;k<var_moderate.length;k++)
             {
-                for(var z=0;z<jsonArray_all.length;z++)
-                {
-                    if(var_negative[k]==jsonArray_all[z].var)
-                    {
-                        text=text+"<b>"+ correlation_coefficient_strength(jsonArray_all[z].x_array,jsonArray_all[z].y_array)+"</b>," 
-                    }
-                }
-                
-            } 
-            text= text + " when the Individuals are <b>"+ var_negative + "</b>, because as <b>"+ x_axis_title +"</b> decreases, so does <b>"+ y_axis_title+"</b>. "
+                text=text+"<b>"+ var_moderate[k]+"</b>.  "                 
+            }
+            text=text +"</br> ";      
         }
-        text=text+"This means that the points on the scatterplot closely resemble a straight line."+"<br/>"+"<br/>"
+        else{
+            text=text +"Moderate: null</br>";
+        }
+
+        if(var_weak.length!=0)
+        {
+            text=text +"Weak: ";
+            for(let k=0;k<var_weak.length;k++)
+            {
+                text=text+"<b>"+ var_weak[k]+"</b>.  "              
+            }  
+        }
+        else{
+            text=text +"Weak: null</br>";
+        }      
     }
- 
+    else
+    {
+        text = "There is <b>no linear relationship</b> in this dataset! </br></br>";
+    }
+    text = text +"</br></br>";
+
+    text = text +"Outliers:" + "<br/>"+"<br/>"
+
+    if(var_weak.length!=0)
+    {
+
+    }
+
+    if(var_non_linear.length!=0)
+    {
+        for(let k=0;k<var_non_linear.length;k++)
+        {
+            if(var_non_linear[k]==jsonArray_all[k].var)
+            {
+
+            }
+            text=text+"<b>"+ var_non_linear[k]+"</b>.  "                 
+        }        
+    }
+
     return text;
 }
+
+
+//standard deviation
+function stdDeviation(arr) {
+    let sd,
+        ave,
+        sum = 0,
+        sums=0,
+        len = arr.length;
+    for (let i = 0; i < len; i++) {
+        sum += Number(arr[i]);
+    }
+    ave = sum / len;
+    for(let i = 0; i < len; i++){
+        sums+=(Number(arr[i])- ave)*(Number(arr[i])- ave)
+    }
+    sd=(Math.sqrt(sums/len)).toFixed(4);
+    return sd;
+}
+
+
+//Regression analysis
+function Outliers_regression_analysis()
+{
+
+}
+
+
+//Outliers Z-score
+function Outliers_ZScore(arr)
+{   
+    var threshold_1=3;
+    var threshold_2=-3;
+    var outliers=[];
+    var mean = average(arr);
+    var std= stdDeviation(arr);
+    let z=0;
+    arr.forEach(function(x){
+        z=(x-mean)/std;
+        if((z>threshold_1) || (z<threshold_2))
+        {
+            outliers.push(x);
+        }
+    });
+    return outliers;
+}
+
+//Outliers Range_IQR
+function Outliers_IQR(arr) {
+    const size = arr.length;
+
+    let q1, q3;
+
+    if (size < 2) {
+        return arr;
+    }
+
+    const sortedCollection = arr.slice().sort((a, b) => a - b);
+
+    if ((size - 1) / 4 % 1 === 0 || size / 4 % 1 === 0) {
+        q1 = 1 / 2 * (sortedCollection[Math.floor(size / 4) - 1] + sortedCollection[Math.floor(size / 4)]);
+        q3 = 1 / 2 * (sortedCollection[Math.ceil(size * 3 / 4) - 1] + sortedCollection[Math.ceil(size * 3 / 4)]);
+    } else {
+        q1 = sortedCollection[Math.floor(size / 4)];
+        q3 = sortedCollection[Math.floor(size * 3 / 4)];
+    }
+
+    const iqr = q3 - q1;
+    const maxValue = q3 + iqr * 1.5;
+    const minValue = q1 - iqr * 1.5;
+
+    var result=sortedCollection.filter((x)=>{
+        return (x>maxValue)||(x<minValue);
+    });
+    return result;
+};
+
 
 
 //k-means clustering
@@ -465,9 +576,15 @@ $("#submit").on("click",function(){
             y_array=[];
         }
 
-        //var a=[17,13,12,15,16,14,16,16,18,19];
+        var a=[10,11,11,11,12,12,13,14,14,15,17,22];
+        var b=[1, 2, 2, 2, 3, 1, 1, 15, 2, 2, 2, 3, 1, 1, 2];
+        var c=[50, 48, 100, 12, 34, 30, 78, 87, 84, 75, 83, 90, 90, 98];
         //var b=[94,73,59,80,93,85,66,79,77,91];
         console.log(jsonArray_all);
+        
+        console.log(Outliers_IQR(b));
+        console.log(Outliers_ZScore(b));
+
 
         $(".description").html("Descriptions: "+"<br/>"+"<br/>"
             +
@@ -475,14 +592,9 @@ $("#submit").on("click",function(){
             x_axis_title + "</b> can range from <b>"+ min_x() + "</b> to <b>"+ max_x() +"</b> and <b>"+ y_axis_title + "</b> in this chart range from <b>"+ min_y() + "</b> to <b>"+ max_y() +"</b>. Individuals in this table were ordered based on their <b>"+x_axis_title + "</b>."+"<br/>"+"<br/>"
             +
             print()
-            +
-            "Outliers:" + "<br/>"+"<br/>"
+
             +   
             "Clustering:" + "<br/>"+"<br/>"
-            +
-            "Predictions:In general, the higher values of "+x_axis_title+", the larger the values of "+y_axis_title+ ", because the relationship between them is linear and positive."+ "<br/>"+"<br/>"
-            +
-            "<br/>"
         );
     
 
