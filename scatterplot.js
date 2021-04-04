@@ -53,7 +53,7 @@ var jsonList_copy={};
 var jsonArray_all=[];
 var jsonList_temp={};
 // load data
-d3.csv("https://gist.githubusercontent.com/chuikokching/73772b5eda16720151f4f1b8c1ace8c1/raw/8663d64822c35b6cee52c34563fa76b3deccbf75/student_GPA_1.csv").then(function(data) {
+d3.csv("https://gist.githubusercontent.com/chuikokching/2dbf88fbfb1232de3f3fc7a211b4f32a/raw/9a59a9357d01349ce36be6a8e9a9f19480436ad8/Income_Life.csv").then(function(data) {
     console.log(data.columns[0]+ " "+data.columns[1]+ " "+data.columns[2]);
 
     jsonList_copy=data;
@@ -196,6 +196,7 @@ function print()
     console.log(var_strong + " strong");
     console.log(var_moderate+ " moderate");
     console.log(var_weak+ " weak");
+    console.log(var_non_linear + " var_non_linear");
 
     if(var_linear.length!=0)
     {     
@@ -246,23 +247,247 @@ function print()
 
     text = text +"Outliers:" + "<br/>"+"<br/>"
 
+    var outliers_array=[];
+    var outliers_array_copy=[];
+    var outliers_x_axis=[];
+    var outliers_y_axis=[];
+
+    var regression_copy=[];
+    var point={};
+
+
+    if(var_strong.length!=0)
+    {
+        for(let k=0;k<var_strong.length;k++)
+        {
+            for(let b=0;b<jsonArray_all.length;b++)
+            {
+                if(var_strong[k]==jsonArray_all[b].var)
+                {
+
+                }
+            }            
+        }
+    }
+
+    if(var_moderate.length!=0)
+    {
+        for(let k=0;k<var_moderate.length;k++)
+        {
+            for(let b=0;b<jsonArray_all.length;b++)
+            {
+                if(var_moderate[k]==jsonArray_all[b].var)
+                {
+                    regression_copy=Outliers_regression_analysis(jsonArray_all[b].x_array,jsonArray_all[b].y_array);
+                    //console.log(regression_copy +  " test in !!!!!!!!!!!!!");
+
+                }
+            }            
+        }
+    }
+
+
     if(var_weak.length!=0)
     {
+        for(let k=0;k<var_weak.length;k++)
+        {
+            for(let b=0;b<jsonArray_all.length;b++)
+            {
+                if(var_weak[k]==jsonArray_all[b].var)
+                {
+                    /*outliers_array_copy= jsonArray_all[b].x_array;
+                    outliers_x_axis= Outliers_ZScore(jsonArray_all[b].x_array);
 
+                    if(outliers_x_axis.length!=0)
+                    {
+                        for(let f=0;f<outliers_x_axis.length;f++)
+                        {
+                            for(let a=0;a<outliers_array_copy.length;a++)
+                            {
+                                if(outliers_x_axis[f]==outliers_array_copy[a])
+                                {
+                                    point["var"]=jsonArray_all[b].var;
+                                    point["x"]=jsonArray_all[b].x_array[a];
+                                    point["y"]=jsonArray_all[b].y_array[a];
+                                    outliers_array.push(point);
+                                    point={};
+                                }
+                            }
+                        }
+                    }
+                    console.log(outliers_x_axis);
+                    outliers_x_axis= Outliers_IQR(jsonArray_all[b].x_array);
+                    if(outliers_x_axis.length!=0)
+                    {
+                        for(let f=0;f<outliers_x_axis.length;f++)
+                        {
+                            for(let a=0;a<outliers_array_copy.length;a++)
+                            {
+                                if(outliers_x_axis[f]==outliers_array_copy[a])
+                                {
+                                    point["var"]=jsonArray_all[b].var;
+                                    point["x"]=jsonArray_all[b].x_array[a];
+                                    point["y"]=jsonArray_all[b].y_array[a];
+                                    outliers_array.push(point);
+                                    point={};
+                                }
+                            }
+                        }
+                    }
+                    console.log(outliers_x_axis);*/
+                    outliers_array_copy= jsonArray_all[b].y_array;
+                    outliers_y_axis= Outliers_ZScore(jsonArray_all[b].y_array);
+                    if(outliers_y_axis.length!=0)
+                    {
+
+                        for(let f=0;f<outliers_y_axis.length;f++)
+                        {
+                            for(let a=0;a<outliers_array_copy.length;a++)
+                            {
+                                if(outliers_y_axis[f]==outliers_array_copy[a])
+                                {
+                                    point["var"]=jsonArray_all[b].var;
+                                    point["x"]=jsonArray_all[b].x_array[a];
+                                    point["y"]=jsonArray_all[b].y_array[a];
+                                    outliers_array.push(point);
+                                    point={};
+                                }
+                            }
+                        }
+                    }
+                    console.log(outliers_y_axis);
+                    outliers_y_axis= Outliers_IQR(jsonArray_all[b].y_array);
+                    if(outliers_y_axis.length!=0)
+                    {
+                        
+                        for(let f=0;f<outliers_y_axis.length;f++)
+                        {
+                            for(let a=0;a<outliers_array_copy.length;a++)
+                            {
+                                if(outliers_y_axis[f]==outliers_array_copy[a])
+                                {
+                                    point["var"]=jsonArray_all[b].var;
+                                    point["x"]=jsonArray_all[b].x_array[a];
+                                    point["y"]=jsonArray_all[b].y_array[a];
+                                    outliers_array.push(point);
+                                    point={};
+                                }
+                            }
+                        }
+                    }
+                    console.log(outliers_y_axis);
+                }
+            }                      
+        }   
     }
 
     if(var_non_linear.length!=0)
     {
         for(let k=0;k<var_non_linear.length;k++)
         {
-            if(var_non_linear[k]==jsonArray_all[k].var)
+            for(let b=0;b<jsonArray_all.length;b++)
             {
+                if(var_non_linear[k]==jsonArray_all[b].var)
+                {
+                    /*outliers_array_copy= jsonArray_all[b].x_array;
+                    outliers_x_axis= Outliers_ZScore(jsonArray_all[b].x_array);
+                    if(outliers_x_axis.length!=0)
+                    {
+                        for(let f=0;f<outliers_x_axis.length;f++)
+                        {
+                            for(let a=0;a<outliers_array_copy.length;a++)
+                            {
+                                if(outliers_x_axis[f]==outliers_array_copy[a])
+                                {
+                                    point["var"]=jsonArray_all[b].var;
+                                    point["x"]=jsonArray_all[b].x_array[a];
+                                    point["y"]=jsonArray_all[b].y_array[a];
+                                    outliers_array.push(point);
+                                    point={};
+                                }
+                            }
+                        }
+                    }
 
-            }
-            text=text+"<b>"+ var_non_linear[k]+"</b>.  "                 
-        }        
+                    outliers_x_axis= Outliers_IQR(jsonArray_all[b].x_array);
+                    if(outliers_x_axis.length!=0)
+                    {
+                        for(let f=0;f<outliers_x_axis.length;f++)
+                        {
+                            for(let a=0;a<outliers_array_copy.length;a++)
+                            {
+                                if(outliers_x_axis[f]==outliers_array_copy[a])
+                                {
+                                    point["var"]=jsonArray_all[b].var;
+                                    point["x"]=jsonArray_all[b].x_array[a];
+                                    point["y"]=jsonArray_all[b].y_array[a];
+                                    outliers_array.push(point);
+                                    point={};
+                                }
+                            }
+                        }
+                    }
+                    */
+                    outliers_array_copy= jsonArray_all[b].y_array;
+                    outliers_y_axis= Outliers_ZScore(jsonArray_all[b].y_array);
+                    if(outliers_y_axis.length!=0)
+                    {
+                        for(let f=0;f<outliers_y_axis.length;f++)
+                        {
+                            for(let a=0;a<outliers_array_copy.length;a++)
+                            {
+                                if(outliers_y_axis[f]==outliers_array_copy[a])
+                                {
+                                    point["var"]=jsonArray_all[b].var;
+                                    point["x"]=jsonArray_all[b].x_array[a];
+                                    point["y"]=jsonArray_all[b].y_array[a];
+                                    outliers_array.push(point);
+                                    point={};
+                                }
+                            }
+                        }
+                    }
+                    console.log(outliers_y_axis);
+                    outliers_y_axis= Outliers_IQR(jsonArray_all[b].y_array);
+                    if(outliers_y_axis.length!=0)
+                    {
+                        for(let f=0;f<outliers_y_axis.length;f++)
+                        {
+                            for(let a=0;a<outliers_array_copy.length;a++)
+                            {
+                                if(outliers_y_axis[f]==outliers_array_copy[a])
+                                {
+                                    point["var"]=jsonArray_all[b].var;
+                                    point["x"]=jsonArray_all[b].x_array[a];
+                                    point["y"]=jsonArray_all[b].y_array[a];
+                                    outliers_array.push(point);
+                                    point={};
+                                }
+                            }
+                        }
+                    }
+                    console.log(outliers_y_axis);
+
+                }
+            }                      
+        }         
     }
+    if(outliers_array.length!=0)
+    {
+        text = text + " There are "+outliers_array.length + " outliers detected, they are as follows ";
 
+        for(let h=0;h<outliers_array.length;h++)
+        {
+            text = text + "<b>["+ outliers_array[h].var +": "+ outliers_array[h].x+ ", "+outliers_array[h].y + "]</b>" + ". ";
+        }
+
+        text = text +"</br>";
+    }
+    else
+    {
+        text= text + "No outliers were found or detected in the dataset. </br></br>"
+    }
+    console.log(outliers_array);
     return text;
 }
 
@@ -287,8 +512,35 @@ function stdDeviation(arr) {
 
 
 //Regression analysis
-function Outliers_regression_analysis()
+function Outliers_regression_analysis(arr_x,arr_y)
 {
+    var regression=[];
+    var l=0;
+    var a=0;
+    var mean_x = average(arr_x);
+    var mean_y = average(arr_y);
+    var sum_x=0;
+    var sum_y=0;
+
+    for(var i=0;i<arr_x.length;i++)
+    {
+        sum_x+=(arr_x[i]- mean_x)*(arr_x[i]-mean_x);
+    }
+
+    for(var k=0;k<arr_y.length;k++)
+    {
+        sum_y+=(arr_y[k]-mean_y)*(arr_y[k]-mean_y);
+    }      
+
+    //console.log(sum_x + " x ||"  + "  y: "+sum_y);
+
+
+    l=correlation_coefficient(arr_x,arr_y)*Math.sqrt(sum_y/(arr_y.length-1))/Math.sqrt(sum_x/(arr_x.length-1));
+    regression.push(l);
+
+    a= mean_y-l*mean_x;
+    regression.push(a);
+    return regression;
 
 }
 
@@ -358,7 +610,7 @@ function correlation_coefficient_linear(arr_x,arr_y)
     else
     {
         var r=correlation_coefficient(arr_x,arr_y);
-
+        console.log(r);
         if(r>=0)
         {
             if(r<0.3)
@@ -469,9 +721,10 @@ function correlation_coefficient(arr_x,arr_y)
 function average(arr){
     var sum=0;
     //console.log(arr.length);
-    arr.forEach(function(e){
-        sum+=parseFloat(e);
-    })
+    for(let c=0;c<arr.length;c++)
+    {
+        sum+=parseFloat(arr[c]);
+    }
     return (sum/arr.length).toFixed(3);
 }
 
@@ -578,18 +831,20 @@ $("#submit").on("click",function(){
 
         var a=[10,11,11,11,12,12,13,14,14,15,17,22];
         var b=[1, 2, 2, 2, 3, 1, 1, 15, 2, 2, 2, 3, 1, 1, 2];
-        var c=[50, 48, 100, 12, 34, 30, 78, 87, 84, 75, 83, 90, 90, 98];
+        var c=[17,13,12,15,16,14,16,16,18,19];
+        var d=[94,73,59,80,93,85,66,79,77,91];
+
         //var b=[94,73,59,80,93,85,66,79,77,91];
         console.log(jsonArray_all);
-        
-        console.log(Outliers_IQR(b));
-        console.log(Outliers_ZScore(b));
+        console.log(Outliers_regression_analysis(c,d))
+        //console.log(Outliers_IQR(b));
+        //console.log(Outliers_ZScore(b));
 
 
         $(".description").html("Descriptions: "+"<br/>"+"<br/>"
             +
             "In this chart, the relationship between <b>"+ x_axis_title +"</b> and <b>"+ y_axis_title +"</b> for <b>"+ legend_var + "</b> is being investigated. <b>"+ 
-            x_axis_title + "</b> can range from <b>"+ min_x() + "</b> to <b>"+ max_x() +"</b> and <b>"+ y_axis_title + "</b> in this chart range from <b>"+ min_y() + "</b> to <b>"+ max_y() +"</b>. Individuals in this table were ordered based on their <b>"+x_axis_title + "</b>."+"<br/>"+"<br/>"
+            x_axis_title + "</b> can range from <b>"+ min_x() + "</b> to <b>"+ max_x() +"</b> and <b>"+ y_axis_title + "</b> in this chart range from <b>"+ min_y() + "</b> to <b>"+ max_y() +"</b>. "+"<br/>"+"<br/>"
             +
             print()
 

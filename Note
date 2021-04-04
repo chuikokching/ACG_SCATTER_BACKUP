@@ -22,8 +22,21 @@ Outliers:
 2.IOR
 3.Regression analysis
 
+1. we obsev a linaer correlation between x and y for all (overall correlation)
+we obser strong positive correlation for max
+
+correlation min-one
+
+dot-name(outliers)
+highlight
+3 dimension outliers(highlight the outliers in text(onclick , or hover))
+
+short and understandable
 
 k-means Unsupervised Algorithms: to discover groups of things, people, or ideas that are closely related to each other.
+
+One property: the number of clusters is defined in advance.
+
 
 
 
