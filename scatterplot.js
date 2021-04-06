@@ -53,7 +53,7 @@ var jsonList_copy={};
 var jsonArray_all=[];
 var jsonList_temp={};
 // load data
-d3.csv("https://gist.githubusercontent.com/chuikokching/2dbf88fbfb1232de3f3fc7a211b4f32a/raw/9a59a9357d01349ce36be6a8e9a9f19480436ad8/Income_Life.csv").then(function(data) {
+d3.csv("https://gist.githubusercontent.com/chuikokching/1448273abe20646dc2e004c98fff79e7/raw/f6e41aeddae24c58d31c9796f4e5e725536daa33/test_outliers_1.csv").then(function(data) {
     console.log(data.columns[0]+ " "+data.columns[1]+ " "+data.columns[2]);
 
     jsonList_copy=data;
@@ -117,7 +117,7 @@ d3.csv("https://gist.githubusercontent.com/chuikokching/2dbf88fbfb1232de3f3fc7a2
             tooltip.transition()
                 .duration(200)         // ms delay before appearing
                 .style("opacity", .8); // tooltip appears on mouseover
-            tooltip.html(x_axis_title + " " + y_axis_title + "<br/>(" + xValue(d)+ ", " + yValue(d) + ")")
+            tooltip.html(d[variables] + " " + "<br/>(" + xValue(d)+ ", " + yValue(d) + ")")
                 .style("left", (d3.event.pageX + 10) + "px")  // specify x location
                 .style("top", (d3.event.pageY - 28) + "px");  // specify y location
         })
@@ -166,26 +166,33 @@ function unique(arr) {
     return array;
 }
 
+var var_linear=[];
+var var_non_linear=[];
+var var_strong=[];
+var var_moderate=[];
+var var_weak=[];
+var var_correlation={}
+
 //traverse array
-function print()
+function print_correlation()
 {
-    var var_linear=[];
-    var var_non_linear=[];
-    var var_strong=[];
-    var var_moderate=[];
-    var var_weak=[];
-    var text=" This chart compares <b>"+ legend_var+"</b> 's <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b>.";
+    var min,min_pos,max,max_pos;
+    var text="";
     for(var i=0;i<jsonArray_all.length;i++)
     {
         if(correlation_coefficient_linear(jsonArray_all[i].x_array,jsonArray_all[i].y_array)=="linear")
         {
-            var_linear.push(jsonArray_all[i].var);
+            var_correlation["var"]=jsonArray_all[i].var;
+            var_correlation["value_correlation"]=correlation_coefficient(jsonArray_all[i].x_array,jsonArray_all[i].y_array);
+            var_linear.push(var_correlation);
             if(correlation_coefficient_strength(jsonArray_all[i].x_array,jsonArray_all[i].y_array)=="strong")
                 var_strong.push(jsonArray_all[i].var);
             if(correlation_coefficient_strength(jsonArray_all[i].x_array,jsonArray_all[i].y_array)=="weak")
                 var_weak.push(jsonArray_all[i].var);
             if(correlation_coefficient_strength(jsonArray_all[i].x_array,jsonArray_all[i].y_array)=="moderate")
                 var_moderate.push(jsonArray_all[i].var);
+
+            var_correlation={};
         } 
         else
         {
@@ -193,59 +200,88 @@ function print()
         }
     }
 
-    console.log(var_strong + " strong");
-    console.log(var_moderate+ " moderate");
-    console.log(var_weak+ " weak");
-    console.log(var_non_linear + " var_non_linear");
+    //console.log(var_strong + " strong");
+    //console.log(var_moderate+ " moderate");
+    //console.log(var_weak+ " weak");
+    //console.log(var_non_linear + " var_non_linear");
+
+    //console.log(var_linear);
 
     if(var_linear.length!=0)
     {     
-        text=text +" There is a <b>linear relationship</b> in this dataset, their degree of strength relationship corresponding to individuals will be described as follows: </br>";
-        if(var_strong.length!=0)
+        text=text +" We observe that there is a linear correlation relationship between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b>  for <b>"+ var_linear.length +"</b> <b>"+ variables+"</b>. </br>";
+        if(var_linear.length==1)
         {
-            text=text +"Strong: ";
-            for(let k=0;k<var_strong.length;k++)
+            text = text + "<b>"+variables+ " "+var_linear[0].var + "</b> has a ";
+            if(var_linear[0].value_correlation>=0)
             {
-                text=text+"<b>" +var_strong[k]+"</b>.  "             
+                if((0.3<=var_linear[0].value_correlation&&var_linear[0].value_correlation<0.5))
+                    text= text+"weak";
+                if((0.5<=var_linear[0].value_correlation&&var_linear[0].value_correlation<0.7))
+                    text= text+"moderate";
+                if((var_linear[0].value_correlation>=0.7))
+                    text= text+"strong";
             }
-            text=text +"</br> ";
-        }
-        else{
-            text=text +"Strong: null</br>";
-        }
-
-        if(var_moderate.length!=0)
-        {
-            text=text +"Moderate: ";
-            for(let k=0;k<var_moderate.length;k++)
+            else{
+                if((var_linear[0].value_correlation<=-0.3&&var_linear[0].value_correlation>-0.5))
+                    text= text+"weak";
+                if((var_linear[0].value_correlation<=-0.5&&var_linear[0].value_correlation>-0.7))
+                    text= text+"moderate";
+                if((var_linear[0].value_correlation<=-0.7))
+                    text= text+"strong";
+            }   
+                text = text +" linear correlation relationship. </br>";
+            if(var_non_linear.length!=0)
             {
-                text=text+"<b>"+ var_moderate[k]+"</b>.  "                 
+                text=text + "In addition, there are <b>" + var_non_linear.length+ " "+variables+ "</b> where there is no linear correlation relationship.</br>";
             }
-            text=text +"</br> ";      
         }
-        else{
-            text=text +"Moderate: null</br>";
-        }
-
-        if(var_weak.length!=0)
+        else
         {
-            text=text +"Weak: ";
-            for(let k=0;k<var_weak.length;k++)
+            min_pos=0;
+            min=parseFloat(var_linear[0].value_correlation);
+            max_pos=0;
+            max=parseFloat(var_linear[0].value_correlation);
+            for(let k=1;k<var_linear.length;k++)
             {
-                text=text+"<b>"+ var_weak[k]+"</b>.  "              
-            }  
+                if(parseFloat(var_linear[k].value_correlation)>max)
+                {
+                    max_pos=k;
+                    max=parseFloat(var_linear[k].value_correlation);                    
+                }
+
+                if(parseFloat(var_linear[k].value_correlation)<min)
+                {
+                    min_pos=k;
+                    min=parseFloat(var_linear[k].value_correlation);
+                }  
+                    
+            }
+            //console.log(min_pos + " : " + max_pos + " min and max");
+            text = text + "<b>"+variables+ " "+var_linear[max_pos].var + "</b> has <b>maximum</b> value of correlation. </br>";
+            text = text + "<b>"+variables+ " "+var_linear[min_pos].var + "</b> has <b>minimum</b> value of correlation. </br>";
+            if(var_non_linear.length!=0)
+            {
+                text=text + "In addition, there are " + var_non_linear.length+ " "+variables+ " where there is no linear correlation relationship.</br>";
+            }
         }
-        else{
-            text=text +"Weak: null</br>";
-        }      
     }
+
     else
     {
-        text = "There is <b>no linear relationship</b> in this dataset! </br></br>";
+        text = "There is <b>no linear relationship</b> between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b> in this dataset! </br></br>";
     }
-    text = text +"</br></br>";
+    
 
-    text = text +"Outliers:" + "<br/>"+"<br/>"
+
+    return text;
+}
+
+function print_outliers()
+{
+    var text = "</br></br>";
+
+    text = text +"<b>Outliers:</b>" + "<br/>"+"<br/>"
 
     var outliers_array=[];
     var outliers_array_copy=[];
@@ -264,7 +300,21 @@ function print()
             {
                 if(var_strong[k]==jsonArray_all[b].var)
                 {
-
+                    regression_copy=Outliers_regression_analysis(jsonArray_all[b].x_array,jsonArray_all[b].y_array);
+                    //console.log(regression_copy +  " regresion l and a ");
+                    for(let a=0;a<jsonArray_all[b].x_array.length;a++)
+                    {
+                        value=jsonArray_all[b].x_array[a]*regression_copy[0]+regression_copy[1];
+                        if(rate(jsonArray_all[b].y_array[a],value)=="outlier")
+                        {
+                            //console.log("outliers:  value "+ value + " y: "+ jsonArray_all[b].y_array[a] + " x: "+ jsonArray_all[b].x_array[a]);
+                                point["var"]=jsonArray_all[b].var;
+                                point["x"]=jsonArray_all[b].x_array[a];
+                                point["y"]=jsonArray_all[b].y_array[a];
+                                outliers_array.push(point);
+                                point={};
+                        }
+                    }
                 }
             }            
         }
@@ -272,6 +322,7 @@ function print()
 
     if(var_moderate.length!=0)
     {
+        let value=0;
         for(let k=0;k<var_moderate.length;k++)
         {
             for(let b=0;b<jsonArray_all.length;b++)
@@ -279,14 +330,26 @@ function print()
                 if(var_moderate[k]==jsonArray_all[b].var)
                 {
                     regression_copy=Outliers_regression_analysis(jsonArray_all[b].x_array,jsonArray_all[b].y_array);
-                    //console.log(regression_copy +  " test in !!!!!!!!!!!!!");
-
+                    //console.log(regression_copy +  " regresion l and a ");
+                    for(let a=0;a<jsonArray_all[b].x_array.length;a++)
+                    {
+                        value=jsonArray_all[b].x_array[a]*regression_copy[0]+regression_copy[1];
+                        if(rate(jsonArray_all[b].y_array[a],value)=="outlier")
+                        {
+                                //console.log("outliers:  value "+ value + " y: "+ jsonArray_all[b].y_array[a] + " x: "+ jsonArray_all[b].x_array[a]);
+                                point["var"]=jsonArray_all[b].var;
+                                point["x"]=jsonArray_all[b].x_array[a];
+                                point["y"]=jsonArray_all[b].y_array[a];
+                                outliers_array.push(point);
+                                point={};
+                        }
+                    }
                 }
             }            
         }
     }
 
-
+    var set=0;
     if(var_weak.length!=0)
     {
         for(let k=0;k<var_weak.length;k++)
@@ -297,7 +360,6 @@ function print()
                 {
                     /*outliers_array_copy= jsonArray_all[b].x_array;
                     outliers_x_axis= Outliers_ZScore(jsonArray_all[b].x_array);
-
                     if(outliers_x_axis.length!=0)
                     {
                         for(let f=0;f<outliers_x_axis.length;f++)
@@ -315,7 +377,7 @@ function print()
                             }
                         }
                     }
-                    console.log(outliers_x_axis);
+
                     outliers_x_axis= Outliers_IQR(jsonArray_all[b].x_array);
                     if(outliers_x_axis.length!=0)
                     {
@@ -334,12 +396,11 @@ function print()
                             }
                         }
                     }
-                    console.log(outliers_x_axis);*/
+                    */
                     outliers_array_copy= jsonArray_all[b].y_array;
                     outliers_y_axis= Outliers_ZScore(jsonArray_all[b].y_array);
                     if(outliers_y_axis.length!=0)
                     {
-
                         for(let f=0;f<outliers_y_axis.length;f++)
                         {
                             for(let a=0;a<outliers_array_copy.length;a++)
@@ -349,17 +410,31 @@ function print()
                                     point["var"]=jsonArray_all[b].var;
                                     point["x"]=jsonArray_all[b].x_array[a];
                                     point["y"]=jsonArray_all[b].y_array[a];
+                                    point["position"]=a;
+                                    if(outliers_array.length==0)
                                     outliers_array.push(point);
+                                    else
+                                    {
+                                        for(let z=0;z<outliers_array.length;z++)
+                                        {
+                                            //console.log(point.position+ " "+ point.var + " "+outliers_array[z].position + " " + outliers_array[z].var);
+                                            if(point.position==outliers_array[z].position&&point.var==outliers_array[z].var)
+                                                set = 1;
+                                        }
+                                        if(set ==0)
+                                            outliers_array.push(point);
+
+                                    }
                                     point={};
+                                    set = 0;
                                 }
                             }
                         }
                     }
-                    console.log(outliers_y_axis);
+                    console.log(outliers_y_axis + " weak ZScore !!!!!!!!!!!!!!!!");
                     outliers_y_axis= Outliers_IQR(jsonArray_all[b].y_array);
                     if(outliers_y_axis.length!=0)
                     {
-                        
                         for(let f=0;f<outliers_y_axis.length;f++)
                         {
                             for(let a=0;a<outliers_array_copy.length;a++)
@@ -369,20 +444,63 @@ function print()
                                     point["var"]=jsonArray_all[b].var;
                                     point["x"]=jsonArray_all[b].x_array[a];
                                     point["y"]=jsonArray_all[b].y_array[a];
+                                    point["position"]=a;
+                                    if(outliers_array.length==0)
                                     outliers_array.push(point);
+                                    else
+                                    {
+                                        for(let z=0;z<outliers_array.length;z++)
+                                        {
+                                            //console.log(point.position+ " "+ point.var + " "+outliers_array[z].position + " " + outliers_array[z].var);
+                                            if(point.position==outliers_array[z].position&&point.var==outliers_array[z].var)
+                                                set = 1;
+                                        }
+                                        if(set ==0)
+                                            outliers_array.push(point);
+
+                                    }
                                     point={};
+                                    set = 0;
                                 }
                             }
                         }
                     }
-                    console.log(outliers_y_axis);
+                    console.log(outliers_y_axis + " weak IQR !!!!!!!!!!!!!!!!!!!!");
+
                 }
             }                      
-        }   
+        }
+        /*for(let k=0;k<var_weak.length;k++)
+        {
+            for(let b=0;b<jsonArray_all.length;b++)
+            {
+                if(var_weak[k]==jsonArray_all[b].var)
+                {
+                    regression_copy=Outliers_regression_analysis(jsonArray_all[b].x_array,jsonArray_all[b].y_array);
+                    console.log(regression_copy +  " regresion l and a ");
+                    for(let a=0;a<jsonArray_all[b].x_array.length;a++)
+                    {
+                        value=jsonArray_all[b].x_array[a]*regression_copy[0]+regression_copy[1];
+                        if(rate(jsonArray_all[b].y_array[a],value)=="outlier")
+                        {
+                                console.log("outliers:  value "+ value + " y: "+ jsonArray_all[b].y_array[a] + " x: "+ jsonArray_all[b].x_array[a]);
+                                point["var"]=jsonArray_all[b].var;
+                                point["x"]=jsonArray_all[b].x_array[a];
+                                point["y"]=jsonArray_all[b].y_array[a];
+                                outliers_array.push(point);
+                                point={};
+                        }
+                    }
+                }
+            }
+                                 
+        } */
+
+
     }
 
     if(var_non_linear.length!=0)
-    {
+    {//!!!!!!!!!!!**********************
         for(let k=0;k<var_non_linear.length;k++)
         {
             for(let b=0;b<jsonArray_all.length;b++)
@@ -441,13 +559,30 @@ function print()
                                     point["var"]=jsonArray_all[b].var;
                                     point["x"]=jsonArray_all[b].x_array[a];
                                     point["y"]=jsonArray_all[b].y_array[a];
+                                    point["position"]=a;
+                                    if(outliers_array.length==0)
                                     outliers_array.push(point);
+                                    else
+                                    {
+                                        for(let z=0;z<outliers_array.length;z++)
+                                        {
+                                             //console.log(point.position+ " "+ point.var + " "+outliers_array[z].position + " " + outliers_array[z].var);
+                                            if(point.position==outliers_array[z].position&&point.var==outliers_array[z].var)
+                                            {
+                                                //console.log(" gooooooooooooooooooo !!!!!!!!!!!!" );
+                                                  set = 1;
+                                            }                                               
+                                        }
+                                        if(set ==0)
+                                            outliers_array.push(point);                                      
+                                    }
                                     point={};
+                                    set = 0;
                                 }
                             }
                         }
                     }
-                    console.log(outliers_y_axis);
+                    console.log(outliers_y_axis + " no linear relationship ZScore!!!!!!!!!!!");
                     outliers_y_axis= Outliers_IQR(jsonArray_all[b].y_array);
                     if(outliers_y_axis.length!=0)
                     {
@@ -460,13 +595,28 @@ function print()
                                     point["var"]=jsonArray_all[b].var;
                                     point["x"]=jsonArray_all[b].x_array[a];
                                     point["y"]=jsonArray_all[b].y_array[a];
+                                    point["position"]=a;
+                                    if(outliers_array.length==0)
                                     outliers_array.push(point);
+                                    else
+                                    {
+                                        for(let z=0;z<outliers_array.length;z++)
+                                        {
+                                            //console.log(point.position+ " "+ point.var + " "+outliers_array[z].position + " " + outliers_array[z].var);
+                                            if(point.position==outliers_array[z].position&&point.var==outliers_array[z].var)
+                                                set = 1;
+                                        }
+                                        if(set ==0)
+                                            outliers_array.push(point);
+
+                                    }
                                     point={};
+                                    set = 0;
                                 }
                             }
                         }
                     }
-                    console.log(outliers_y_axis);
+                    console.log(outliers_y_axis + " no linear relationship IQR!!!!!!!!!!!!!");
 
                 }
             }                      
@@ -474,7 +624,7 @@ function print()
     }
     if(outliers_array.length!=0)
     {
-        text = text + " There are "+outliers_array.length + " outliers detected, they are as follows ";
+        text = text + " There are "+outliers_array.length + " outliers detected, they are as follows: </br>";
 
         for(let h=0;h<outliers_array.length;h++)
         {
@@ -491,6 +641,75 @@ function print()
     return text;
 }
 
+
+function print_clustering()
+{
+    cluster_data=[];
+    let data={};
+    let pointList=[];
+    let temp=[];
+    text="";
+    for(let f=0;f<jsonArray_all.length;f++)
+    {
+        data["individual"]=jsonArray_all[f].var;
+        for(let p=0;p<jsonArray_all[f].x_array.length;p++)
+        {
+            temp.push(parseFloat(jsonArray_all[f].x_array[p]));
+            temp.push(parseFloat(jsonArray_all[f].y_array[p]));
+            pointList.push(temp);
+            temp=[];
+        }
+        data["data"]=pointList;
+        pointList=[];
+        temp=[];
+        cluster_data.push(data);
+        data={};
+    }
+
+    console.log(cluster_data);
+    let result;
+    for(let o=0;o<cluster_data.length;o++)
+    {
+        result=kmeans(cluster_data[o].data,3)
+        console.log(result.centroids);
+        text=text+"For <b>"+cluster_data[o].individual + "</b>, he has <b>"+ result.centroids.length+ "</b> centroids, their details are as follows: </br></br> "
+        
+        for(let q=0;q<result.centroids.length;q++)
+        {
+            text=text+"Cluster sizes of centroid <b>["+ result.clusters[q].centroid[0].toFixed(3)+","+result.clusters[q].centroid[1].toFixed(3)+ "]</b> is <b>"+result.clusters[q].points.length + "</b>.  ("+ result.clusters[q].points.length+" data points)</br>";
+        }
+        text=text+"</br>";
+  
+    }
+
+    //let result = kmeans(cluster_data[0].data,3);
+    //console.log(result.centroids);
+    //console.log(result.clusters);
+    
+    return text;
+}
+
+
+function rate(y,value)
+{
+    if(y!=0 && value!=0)
+    {
+    if(y>=value)
+    {
+        if(y/value > 1.65 )
+        return "outlier";
+        else
+            return "not_outlier"
+    }
+    else{
+        if(value/y > 1.65 )
+        return "outlier";
+        else
+         return "not_outlier"
+    }
+    }
+
+}
 
 //standard deviation
 function stdDeviation(arr) {
@@ -553,9 +772,11 @@ function Outliers_ZScore(arr)
     var outliers=[];
     var mean = average(arr);
     var std= stdDeviation(arr);
+    //console.log(std);
     let z=0;
     arr.forEach(function(x){
         z=(x-mean)/std;
+        //console.log(z + " "+ x);
         if((z>threshold_1) || (z<threshold_2))
         {
             outliers.push(x);
@@ -575,6 +796,7 @@ function Outliers_IQR(arr) {
     }
 
     const sortedCollection = arr.slice().sort((a, b) => a - b);
+
 
     if ((size - 1) / 4 % 1 === 0 || size / 4 % 1 === 0) {
         q1 = 1 / 2 * (sortedCollection[Math.floor(size / 4) - 1] + sortedCollection[Math.floor(size / 4)]);
@@ -597,10 +819,214 @@ function Outliers_IQR(arr) {
 
 
 //k-means clustering
-function k_means()
-{
+const MAX_ITERATIONS = 50;
 
+function randomBetween(min, max) {
+  return Math.floor(
+    Math.random() * (max - min) + min
+  );
 }
+
+function calcMeanCentroid(dataSet, start, end) {
+  const features = dataSet[0].length;
+  const n = end - start;
+  let mean = [];
+  for (let i = 0; i < features; i++) {
+    mean.push(0);
+  }
+  for (let i = start; i < end; i++) {
+    for (let j = 0; j < features; j++) {
+      mean[j] = mean[j] + dataSet[i][j] / n;
+    }
+  }
+  return mean;
+}
+
+function getRandomCentroidsNaiveSharding(dataset, k) {
+  // implementation of a variation of naive sharding centroid initialization method
+  // (not using sums or sorting, just dividing into k shards and calc mean)
+  // https://www.kdnuggets.com/2017/03/naive-sharding-centroid-initialization-method.html
+  const numSamples = dataset.length;
+  // Divide dataset into k shards:
+  const step = Math.floor(numSamples / k);
+  const centroids = [];
+  for (let i = 0; i < k; i++) {
+    const start = step * i;
+    let end = step * (i + 1);
+    if (i + 1 === k) {
+      end = numSamples;
+    }
+    centroids.push(calcMeanCentroid(dataset, start, end));
+  }
+  return centroids;
+}
+
+function getRandomCentroids(dataset, k) {
+  // selects random points as centroids from the dataset
+  const numSamples = dataset.length;
+  const centroidsIndex = [];
+  let index;
+  while (centroidsIndex.length < k) {
+    index = randomBetween(0, numSamples);
+    if (centroidsIndex.indexOf(index) === -1) {
+      centroidsIndex.push(index);
+    }
+  }
+  const centroids = [];
+  for (let i = 0; i < centroidsIndex.length; i++) {
+    const centroid = [...dataset[centroidsIndex[i]]];
+    centroids.push(centroid);
+  }
+  return centroids;
+}
+
+function compareCentroids(a, b) {
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function shouldStop(oldCentroids, centroids, iterations) {
+  if (iterations > MAX_ITERATIONS) {
+    return true;
+  }
+  if (!oldCentroids || !oldCentroids.length) {
+    return false;
+  }
+  let sameCount = true;
+  for (let i = 0; i < centroids.length; i++) {
+    if (!compareCentroids(centroids[i], oldCentroids[i])) {
+      sameCount = false;
+    }
+  }
+  return sameCount;
+}
+
+// Calculate Squared Euclidean Distance
+function getDistanceSQ(a, b) {
+  const diffs = [];
+  for (let i = 0; i < a.length; i++) {
+    diffs.push(a[i] - b[i]);
+  }
+  return diffs.reduce((r, e) => (r + (e * e)), 0);
+}
+
+// Returns a label for each piece of data in the dataset. 
+function getLabels(dataSet, centroids) {
+  // prep data structure:
+  const labels = {};
+  for (let c = 0; c < centroids.length; c++) {
+    labels[c] = {
+      points: [],
+      centroid: centroids[c],
+    };
+  }
+  // For each element in the dataset, choose the closest centroid. 
+  // Make that centroid the element's label.
+  for (let i = 0; i < dataSet.length; i++) {
+    const a = dataSet[i];
+    let closestCentroid, closestCentroidIndex, prevDistance;
+    for (let j = 0; j < centroids.length; j++) {
+      let centroid = centroids[j];
+      if (j === 0) {
+        closestCentroid = centroid;
+        closestCentroidIndex = j;
+        prevDistance = getDistanceSQ(a, closestCentroid);
+      } else {
+        // get distance:
+        const distance = getDistanceSQ(a, centroid);
+        if (distance < prevDistance) {
+          prevDistance = distance;
+          closestCentroid = centroid;
+          closestCentroidIndex = j;
+        }
+      }
+    }
+    // add point to centroid labels:
+    labels[closestCentroidIndex].points.push(a);
+  }
+  return labels;
+}
+
+function getPointsMean(pointList) {
+  const totalPoints = pointList.length;
+  const means = [];
+  for (let j = 0; j < pointList[0].length; j++) {
+    means.push(0);
+  }
+  for (let i = 0; i < pointList.length; i++) {
+    const point = pointList[i];
+    for (let j = 0; j < point.length; j++) {
+      const val = point[j];
+      means[j] = means[j] + val / totalPoints;
+    }
+  }
+  return means;
+}
+
+function recalculateCentroids(dataSet, labels, k) {
+  // Each centroid is the geometric mean of the points that
+  // have that centroid's label. Important: If a centroid is empty (no points have
+  // that centroid's label) you should randomly re-initialize it.
+  let newCentroid;
+  const newCentroidList = [];
+  for (const k in labels) {
+    const centroidGroup = labels[k];
+    if (centroidGroup.points.length > 0) {
+      // find mean:
+      newCentroid = getPointsMean(centroidGroup.points);
+    } else {
+      // get new random centroid
+      newCentroid = getRandomCentroids(dataSet, 1)[0];
+    }
+    newCentroidList.push(newCentroid);
+  }
+  return newCentroidList;
+}
+
+function kmeans(dataset, k, useNaiveSharding = true) {
+  if (dataset.length && dataset[0].length && dataset.length > k) {
+    // Initialize book keeping variables
+    let iterations = 0;
+    let oldCentroids, labels, centroids;
+
+    // Initialize centroids randomly
+    if (useNaiveSharding) {
+      centroids = getRandomCentroidsNaiveSharding(dataset, k);
+    } else {
+      centroids = getRandomCentroids(dataset, k);
+    }
+
+    // Run the main k-means algorithm
+    while (!shouldStop(oldCentroids, centroids, iterations)) {
+      // Save old centroids for convergence test.
+      oldCentroids = [...centroids];
+      iterations++;
+
+      // Assign labels to each datapoint based on centroids
+      labels = getLabels(dataset, centroids);
+      centroids = recalculateCentroids(dataset, labels, k);
+    }
+
+    const clusters = [];
+    for (let i = 0; i < k; i++) {
+      clusters.push(labels[i]);
+    }
+    const results = {
+      clusters: clusters,
+      centroids: centroids,
+      iterations: iterations,
+      converged: iterations <= MAX_ITERATIONS,
+    };
+    return results;
+  } else {
+    throw new Error('Invalid dataset');
+  }
+}
+
 
 //correlation value r
 function correlation_coefficient_linear(arr_x,arr_y)
@@ -610,7 +1036,7 @@ function correlation_coefficient_linear(arr_x,arr_y)
     else
     {
         var r=correlation_coefficient(arr_x,arr_y);
-        console.log(r);
+        //console.log(r);
         if(r>=0)
         {
             if(r<0.3)
@@ -832,24 +1258,34 @@ $("#submit").on("click",function(){
         var a=[10,11,11,11,12,12,13,14,14,15,17,22];
         var b=[1, 2, 2, 2, 3, 1, 1, 15, 2, 2, 2, 3, 1, 1, 2];
         var c=[17,13,12,15,16,14,16,16,18,19];
-        var d=[94,73,59,80,93,85,66,79,77,91];
+        var d=[2,2,3,2,5,1,6];
+
+
 
         //var b=[94,73,59,80,93,85,66,79,77,91];
         console.log(jsonArray_all);
-        console.log(Outliers_regression_analysis(c,d))
-        //console.log(Outliers_IQR(b));
-        //console.log(Outliers_ZScore(b));
+        //console.log(Outliers_regression_analysis(c,d))
+        //console.log(Outliers_IQR(d));
+        //console.log(Outliers_ZScore(d));
 
 
         $(".description").html("Descriptions: "+"<br/>"+"<br/>"
             +
-            "In this chart, the relationship between <b>"+ x_axis_title +"</b> and <b>"+ y_axis_title +"</b> for <b>"+ legend_var + "</b> is being investigated. <b>"+ 
+            "<b>Overview:</b>  </br> </br>"
+            +
+            "In this chart, the relationship between <b>"+ x_axis_title +"</b> and <b>"+ y_axis_title +"</b> for <b>"+ legend_var.length +" "+ variables + "</b> is being investigated. <b>"+ 
             x_axis_title + "</b> can range from <b>"+ min_x() + "</b> to <b>"+ max_x() +"</b> and <b>"+ y_axis_title + "</b> in this chart range from <b>"+ min_y() + "</b> to <b>"+ max_y() +"</b>. "+"<br/>"+"<br/>"
             +
-            print()
-
+            "<b>Correlaion:</b> </br> </br>"
+            +
+            print_correlation()
+            +
+            print_outliers()+"<br/>"+"<br/>"
             +   
-            "Clustering:" + "<br/>"+"<br/>"
+            "<b>Clustering:</b>" + "<br/>"+"<br/>"
+            +
+            print_clustering()
+            + "<br/>"+"<br/>"
         );
     
 
