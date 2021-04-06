@@ -239,6 +239,11 @@ body {
 	color: #1f375a
 }
 
+
+.point:hover{
+	color: black;
+}
+
 .description{
 	width: 600px;
 	height: 800px;

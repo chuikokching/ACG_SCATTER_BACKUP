@@ -53,7 +53,7 @@ var jsonList_copy={};
 var jsonArray_all=[];
 var jsonList_temp={};
 // load data
-d3.csv("https://gist.githubusercontent.com/chuikokching/1448273abe20646dc2e004c98fff79e7/raw/f6e41aeddae24c58d31c9796f4e5e725536daa33/test_outliers_1.csv").then(function(data) {
+d3.csv("https://gist.githubusercontent.com/chuikokching/2dbf88fbfb1232de3f3fc7a211b4f32a/raw/f68449095e03fbb49b7e31bb3a8150f03fd839b7/Income_Life.csv").then(function(data) {
     console.log(data.columns[0]+ " "+data.columns[1]+ " "+data.columns[2]);
 
     jsonList_copy=data;
@@ -676,19 +676,25 @@ function print_clustering()
         
         for(let q=0;q<result.centroids.length;q++)
         {
-            text=text+"Cluster sizes of centroid <b>["+ result.clusters[q].centroid[0].toFixed(3)+","+result.clusters[q].centroid[1].toFixed(3)+ "]</b> is <b>"+result.clusters[q].points.length + "</b>.  ("+ result.clusters[q].points.length+" data points)</br>";
+            text=text+"Cluster sizes of centroid <span class=\"point\"><b>["+ result.clusters[q].centroid[0].toFixed(3)+","+result.clusters[q].centroid[1].toFixed(3)+ "]</b></span> is <b>"+result.clusters[q].points.length + "</b>.  ("+ result.clusters[q].points.length+" data points)</br>";
         }
         text=text+"</br>";
   
     }
 
     //let result = kmeans(cluster_data[0].data,3);
-    //console.log(result.centroids);
-    //console.log(result.clusters);
+    console.log(result.centroids);
+    console.log(result.clusters);
     
     return text;
 }
 
+
+/*
+$(".point").("onmouse-over",function{
+    result.clusters.addClass();
+})
+*/
 
 function rate(y,value)
 {
@@ -1161,7 +1167,7 @@ function max_x(){
     {
         if(parseFloat(jsonList_copy[j][x_axis_title])>max)
         {
-            max=jsonList_copy[j][x_axis_title]
+            max=parseFloat(jsonList_copy[j][x_axis_title]);
         }
     }
     return max;
@@ -1174,7 +1180,7 @@ function max_y(){
 
         if(parseFloat(jsonList_copy[j][y_axis_title])>max)
         {
-            max=jsonList_copy[j][y_axis_title]
+            max=parseFloat(jsonList_copy[j][y_axis_title]);
         }
     }
     return max;
@@ -1188,7 +1194,7 @@ function min_x(){
     {
         if(parseFloat(jsonList_copy[j][x_axis_title])<min)
         {
-            min=jsonList_copy[j][x_axis_title];
+            min=parseFloat(jsonList_copy[j][x_axis_title]);
         }
     }
     return min;
@@ -1201,7 +1207,7 @@ function min_y(){
     {
         if(parseFloat(jsonList_copy[j][y_axis_title])<min)
         {
-            min=jsonList_copy[j][y_axis_title];
+            min=parseFloat(jsonList_copy[j][y_axis_title]);
         }
     }
     return min;
@@ -1259,7 +1265,6 @@ $("#submit").on("click",function(){
         var b=[1, 2, 2, 2, 3, 1, 1, 15, 2, 2, 2, 3, 1, 1, 2];
         var c=[17,13,12,15,16,14,16,16,18,19];
         var d=[2,2,3,2,5,1,6];
-
 
 
         //var b=[94,73,59,80,93,85,66,79,77,91];
