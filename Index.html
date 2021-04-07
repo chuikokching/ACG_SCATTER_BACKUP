@@ -13,6 +13,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    
 
     <style>
         .tooltip {
@@ -32,6 +33,13 @@
             font-family: calibri;
             color: white;
         }
+        .point_cluster:hover{
+            color:black;        
+        }
+        .point_outlier:hover{
+            color:black;        
+        }
+
     </style>
 </head>
 <body>
@@ -97,13 +105,15 @@
             });
         </script>
         <div class="main_body">
+
             <div id="scatter_chart" class="chart">
                 <script src="scatterplot.js"></script>
                 <div id="component"></div>
+
             </div>
 
-            <div class="result">
-                <div class="description">Descriptions</div>
+            <div id="scatter_result" class="result">
+                <div id="desc" class="description">Descriptions</div>
                 <!--<div class="legend">legends</div>
                 <div class="correlation">4 standards(correlation)</div>
                 <div class="relation">relationships</div>-->

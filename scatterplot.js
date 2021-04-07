@@ -184,6 +184,7 @@ function print_correlation()
         {
             var_correlation["var"]=jsonArray_all[i].var;
             var_correlation["value_correlation"]=correlation_coefficient(jsonArray_all[i].x_array,jsonArray_all[i].y_array);
+            var_correlation["association"]=correlation_coefficient_association(jsonArray_all[i].x_array,jsonArray_all[i].y_array);
             var_linear.push(var_correlation);
             if(correlation_coefficient_strength(jsonArray_all[i].x_array,jsonArray_all[i].y_array)=="strong")
                 var_strong.push(jsonArray_all[i].var);
@@ -216,24 +217,24 @@ function print_correlation()
             if(var_linear[0].value_correlation>=0)
             {
                 if((0.3<=var_linear[0].value_correlation&&var_linear[0].value_correlation<0.5))
-                    text= text+"weak";
+                    text= text+"weak "+var_linear[0].value_correlation;
                 if((0.5<=var_linear[0].value_correlation&&var_linear[0].value_correlation<0.7))
-                    text= text+"moderate";
+                    text= text+"moderate "+var_linear[0].value_correlation;
                 if((var_linear[0].value_correlation>=0.7))
-                    text= text+"strong";
+                    text= text+"strong "+var_linear[0].value_correlation;
             }
             else{
                 if((var_linear[0].value_correlation<=-0.3&&var_linear[0].value_correlation>-0.5))
-                    text= text+"weak";
+                    text= text+"weak "+var_linear[0].value_correlation;
                 if((var_linear[0].value_correlation<=-0.5&&var_linear[0].value_correlation>-0.7))
-                    text= text+"moderate";
+                    text= text+"moderate "+var_linear[0].value_correlation;
                 if((var_linear[0].value_correlation<=-0.7))
-                    text= text+"strong";
+                    text= text+"strong "+var_linear[0].value_correlation;
             }   
-                text = text +" linear correlation relationship. </br>";
+                text = text +" linear "+var_linear[0].association +" correlation. </br>";
             if(var_non_linear.length!=0)
             {
-                text=text + "In addition, there are <b>" + var_non_linear.length+ " "+variables+ "</b> where there is no linear correlation relationship.</br>";
+                text=text + "In addition, there are <b>" + var_non_linear.length+ " "+variables+ "</b> where there is no linear correlation.</br>";
             }
         }
         else
@@ -258,18 +259,18 @@ function print_correlation()
                     
             }
             //console.log(min_pos + " : " + max_pos + " min and max");
-            text = text + "<b>"+variables+ " "+var_linear[max_pos].var + "</b> has <b>maximum</b> value of correlation. </br>";
-            text = text + "<b>"+variables+ " "+var_linear[min_pos].var + "</b> has <b>minimum</b> value of correlation. </br>";
+            text = text + "<b>"+variables+ " "+var_linear[max_pos].var + "</b> has <b>maximum "+max+ "</b> value of correlation. ("+var_linear[max_pos].association +")</br>";
+            text = text + "<b>"+variables+ " "+var_linear[min_pos].var + "</b> has <b>minimum "+min+ "</b> value of correlation. ("+var_linear[min_pos].association +")</br>";
             if(var_non_linear.length!=0)
             {
-                text=text + "In addition, there are " + var_non_linear.length+ " "+variables+ " where there is no linear correlation relationship.</br>";
+                text=text + "In addition, there are " + var_non_linear.length+ " "+variables+ " where there is no linear correlation.</br>";
             }
         }
     }
 
     else
     {
-        text = "There is <b>no linear relationship</b> between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b> in this dataset! </br></br>";
+        text = "There is <b>no linear correlation</b> between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b> in this dataset! </br></br>";
     }
     
 
@@ -641,7 +642,7 @@ function print_outliers()
     return text;
 }
 
-
+var result_clustering;
 function print_clustering()
 {
     cluster_data=[];
@@ -667,34 +668,30 @@ function print_clustering()
     }
 
     console.log(cluster_data);
-    let result;
+    
     for(let o=0;o<cluster_data.length;o++)
     {
-        result=kmeans(cluster_data[o].data,3)
-        console.log(result.centroids);
-        text=text+"For <b>"+cluster_data[o].individual + "</b>, he has <b>"+ result.centroids.length+ "</b> centroids, their details are as follows: </br></br> "
+        result_clustering=kmeans(cluster_data[o].data,3)
+        //console.log(result.centroids);
+        text=text+"For <b>"+cluster_data[o].individual + "</b>, he has <b>"+ result_clustering.centroids.length+ "</b> centroids, their details are as follows: </br></br> "
         
-        for(let q=0;q<result.centroids.length;q++)
+        for(let q=0;q<result_clustering.centroids.length;q++)
         {
-            text=text+"Cluster sizes of centroid <span class=\"point\"><b>["+ result.clusters[q].centroid[0].toFixed(3)+","+result.clusters[q].centroid[1].toFixed(3)+ "]</b></span> is <b>"+result.clusters[q].points.length + "</b>.  ("+ result.clusters[q].points.length+" data points)</br>";
+            text=text+"Cluster sizes of centroid <span class=\"point_cluster\"><b>["+ result_clustering.clusters[q].centroid[0].toFixed(3)+","+result_clustering.clusters[q].centroid[1].toFixed(3)+ "]</b></span> is <b>"+result_clustering.clusters[q].points.length + "</b>.  ("+ result_clustering.clusters[q].points.length+" data points)</br>";
         }
         text=text+"</br>";
   
     }
 
     //let result = kmeans(cluster_data[0].data,3);
-    console.log(result.centroids);
-    console.log(result.clusters);
+    //console.log(result_clustering.centroids);
+    //console.log(result_clustering.clusters);
     
     return text;
 }
 
 
-/*
-$(".point").("onmouse-over",function{
-    result.clusters.addClass();
-})
-*/
+
 
 function rate(y,value)
 {
@@ -1213,7 +1210,7 @@ function min_y(){
     return min;
 }
 
-
+//Info function
 $("#infos").on("click",function(){
    Swal.fire(
       'A description of the association in a scatterplot should always include a description of the form, direction, ' +'and strength of the association, along with the presence of any outliers.',
@@ -1224,6 +1221,23 @@ $("#infos").on("click",function(){
        'info'
    );
 });
+
+
+//Point cluster_mouseover
+$("div").on("mouseover",".point_cluster",function(){
+   let text = $(this).text();
+    console.log(" oncall 24 hours over");
+    //console.log(result_clustering);
+});
+
+//Point cluster_mouseover
+$("div").on("mouseout",".point_cluster",function(){
+   let text = $(this).text();
+    console.log(" oncall 24 hours out");
+    //console.log(result_clustering);
+});
+
+
 
 //Submit function
 $("#submit").on("click",function(){
