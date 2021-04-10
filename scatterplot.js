@@ -52,13 +52,17 @@ var x_array=[],y_array=[];
 var jsonList_copy={};
 var jsonArray_all=[];
 var jsonList_temp={};
+
+var dot_set=[];
+var dot_point={};
+
 // load data
 d3.csv("https://gist.githubusercontent.com/chuikokching/2dbf88fbfb1232de3f3fc7a211b4f32a/raw/f68449095e03fbb49b7e31bb3a8150f03fd839b7/Income_Life.csv").then(function(data) {
-    console.log(data.columns[0]+ " "+data.columns[1]+ " "+data.columns[2]);
+    //console.log(data.columns[0]+ " "+data.columns[1]+ " "+data.columns[2]);
 
     jsonList_copy=data;
 
-    //console.log(jsonList_copy);
+    console.log(jsonList_copy);
 
     //set title of x and y axis
     variables = data.columns[0];
@@ -72,45 +76,62 @@ d3.csv("https://gist.githubusercontent.com/chuikokching/2dbf88fbfb1232de3f3fc7a2
 
     // setup x - use +d to change string (from CSV) into number format
     var xValue = function(d) { return +d[x_axis_title];}, // data -> value
-        x=d3.scaleLinear().range([0,width]),     // value -> display, length of x-axis
-        xMap = function(d) { return x(xValue(d));}; // data -> display
+        x=d3.scaleLinear().range([0,width]);     // value -> display, length of x-axis
+        //xMap = function(d) { return x(xValue(d));}; // data -> display
 
     // setup y - use +d to change string into number format
     var yValue = function(d) { return +d[y_axis_title];}, // data -> value
-        y = d3.scaleLinear().range([height, 0]),    // value -> display, length of y-axis
-        yMap = function(d) { return y(yValue(d));}; // data -> display
+        y = d3.scaleLinear().range([height, 0]);    // value -> display, length of y-axis
+        //yMap = function(d) { return y(yValue(d));}; // data -> display
 
     // don't want dots overlapping axis, so add in buffer to data domain
     x.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
     y.domain([0, d3.max(data, yValue)+1]);
 
-    // Add the x-axis.
+    // Add x-axis.
     g_body.append("g")
         .attr("class", "axis x-axis")
         .attr("transform", "translate(0," + height + ")") // move axis to bottom of chart
         .call(d3.axisBottom(x));
-    // Add the y-axis.
+    // Add y-axis.
     g_body.append("g")
         .attr("class", "axis y-axis")
         .call(d3.axisLeft(y));
+
 
     //create color scale
     var cValue = function(d) {
     
         legend_var.push(d[variables]);
         return d[variables];},
-        colors = d3.scaleOrdinal(d3.schemeCategory10);
-         
-     
+        colors = d3.scaleOrdinal(d3.schemeCategory10);   
+
     // draw dots
     g_body.selectAll(".dot")
         .data(data)
-        .enter().append("circle")
+        .enter()
+        .append("circle")
         .attr("class", "dot")
         .attr("r", 5)
-        .attr("cx", xMap)
-        .attr("cy", yMap)
-        .style("fill", function(d) {return colors(cValue(d)); })
+        .attr("cx", function(d) { 
+            //console.log(x(xValue(d)) + " : X " + xValue(d) );
+            dot_point['var']=d[variables];
+            dot_point['x']=xValue(d);
+            dot_point['cx']=x(xValue(d));
+            dot_point['y']=yValue(d);
+            dot_point['cy']=y(yValue(d));
+            dot_set.push(dot_point);
+            dot_point={};
+            return x(xValue(d));
+        })
+        .attr("cy", function(d) {
+            //console.log(y(yValue(d)) + " : Y " +yValue(d) );
+            return y(yValue(d));
+        })
+        .style("fill", function(d) {
+            //console.log(d[x_axis_title] + " text in dots !!!");
+            return colors(cValue(d)); 
+        })
 
         // tooltip
         .on("mouseover", function(d) {
@@ -126,7 +147,10 @@ d3.csv("https://gist.githubusercontent.com/chuikokching/2dbf88fbfb1232de3f3fc7a2
                 .duration(500)
                 .style("opacity", 0); // disappear on mouseout
         });
-
+    //let column=["var","x","cx","y","cy"];
+    //dot_set.push(column);
+    console.log(dot_set);
+    
     // draw legend
     var legend = svg.selectAll(".legend")
         .data(colors.domain())
@@ -210,28 +234,28 @@ function print_correlation()
 
     if(var_linear.length!=0)
     {     
-        text=text +" We observe that there is a linear correlation relationship between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b>  for <b>"+ var_linear.length +"</b> <b>"+ variables+"</b>. </br>";
+        text=text +" We observed that there is a linear correlation between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b>  for <b>"+ var_linear.length +"</b> <b>"+ variables+"</b>. </br>";
         if(var_linear.length==1)
         {
             text = text + "<b>"+variables+ " "+var_linear[0].var + "</b> has a ";
             if(var_linear[0].value_correlation>=0)
             {
                 if((0.3<=var_linear[0].value_correlation&&var_linear[0].value_correlation<0.5))
-                    text= text+"weak "+var_linear[0].value_correlation;
+                    text= text+"weak ";
                 if((0.5<=var_linear[0].value_correlation&&var_linear[0].value_correlation<0.7))
-                    text= text+"moderate "+var_linear[0].value_correlation;
+                    text= text+"moderate ";
                 if((var_linear[0].value_correlation>=0.7))
-                    text= text+"strong "+var_linear[0].value_correlation;
+                    text= text+"strong ";
             }
             else{
                 if((var_linear[0].value_correlation<=-0.3&&var_linear[0].value_correlation>-0.5))
-                    text= text+"weak "+var_linear[0].value_correlation;
+                    text= text+"weak ";
                 if((var_linear[0].value_correlation<=-0.5&&var_linear[0].value_correlation>-0.7))
-                    text= text+"moderate "+var_linear[0].value_correlation;
+                    text= text+"moderate ";
                 if((var_linear[0].value_correlation<=-0.7))
-                    text= text+"strong "+var_linear[0].value_correlation;
+                    text= text+"strong ";
             }   
-                text = text +" linear "+var_linear[0].association +" correlation. </br>";
+                text = text +" linear correlation. ("+var_linear[0].value_correlation+" , "+var_linear[0].association +")</br>";
             if(var_non_linear.length!=0)
             {
                 text=text + "In addition, there are <b>" + var_non_linear.length+ " "+variables+ "</b> where there is no linear correlation.</br>";
@@ -673,11 +697,11 @@ function print_clustering()
     {
         result_clustering=kmeans(cluster_data[o].data,3)
         //console.log(result.centroids);
-        text=text+"For <b>"+cluster_data[o].individual + "</b>, he has <b>"+ result_clustering.centroids.length+ "</b> centroids, their details are as follows: </br></br> "
+        text=text+"We observed that there are <b>"+result_clustering.centroids.length+ " clusters</b> " + "for <b>"+cluster_data[o].individual + "</b>, their details are as follows: </br></br> "
         
         for(let q=0;q<result_clustering.centroids.length;q++)
         {
-            text=text+"Cluster sizes of centroid <span class=\"point_cluster\"><b>["+ result_clustering.clusters[q].centroid[0].toFixed(3)+","+result_clustering.clusters[q].centroid[1].toFixed(3)+ "]</b></span> is <b>"+result_clustering.clusters[q].points.length + "</b>.  ("+ result_clustering.clusters[q].points.length+" data points)</br>";
+            text=text+"Cluster sizes of centroid [<span class=\"point_cluster\"><b>"+ result_clustering.clusters[q].centroid[0].toFixed(3)+","+result_clustering.clusters[q].centroid[1].toFixed(3)+ "</b></span>] is <b>"+result_clustering.clusters[q].points.length + "</b>.  ("+ result_clustering.clusters[q].points.length+" data points)</br>";
         }
         text=text+"</br>";
   
@@ -1222,19 +1246,108 @@ $("#infos").on("click",function(){
    );
 });
 
-
+var temp_dot=[];
 //Point cluster_mouseover
 $("div").on("mouseover",".point_cluster",function(){
-   let text = $(this).text();
-    console.log(" oncall 24 hours over");
+   let coordinate = $(this).text().split(',');
     //console.log(result_clustering);
+    let dataset;
+    //let dataset_x=[];
+    //let dataset_y=[];
+    //let temp_dot=[];
+    let temp_point={};
+    for(let k=0;k<result_clustering.clusters.length;k++)
+    {
+        //console.log(result_clustering.clusters[k].centroid[0].toFixed(3) + " "+ text[0] +" : "+ result_clustering.clusters[k].centroid[1]+ " " +text[1] );
+        if((result_clustering.clusters[k].centroid[0].toFixed(3)==coordinate[0])&&(result_clustering.clusters[k].centroid[1].toFixed(3)==coordinate[1]))
+        {
+             
+            dataset = result_clustering.clusters[k].points;
+
+            for(let i=0;i<dataset.length;i++)
+            {
+                //dataset_x.push(dataset[i][0]);
+                //dataset_y.push(dataset[i][1]);
+                for(let z=0;z<dot_set.length;z++)
+                {
+                    if((dataset[i][0]==dot_set[z].x) && (dataset[i][1]==dot_set[z].y))
+                    {
+                        temp_point['var']=dot_set[z].var;
+                        temp_point['x']=dot_set[z].x;
+                        temp_point['cx']=dot_set[z].cx;
+                        temp_point['y']=dot_set[z].y;
+                        temp_point['cy']=dot_set[z].cy;
+                        temp_dot.push(temp_point);
+                        temp_point={};
+                    }
+
+                }
+            }
+            //console.log(dataset);
+            console.log(temp_dot);
+
+            // draw dots
+            g_body.selectAll(".dot_cluster")
+                .data(temp_dot)
+                .enter().append("circle")
+                .attr("class", "dot_cluster")
+                .attr("r", 5)
+                .attr("cx", function(d){
+                    //console.log(d['cx']);
+                    return d['cx'];
+                })
+                .attr("cy", function(d){
+                    //console.log(d['cy']);
+                    return d['cy'];
+                })
+                .style("fill", function(d) {
+                    //console.log(d['x']+ " text in dots ");
+                    return "black"; 
+                })
+                /*
+                // tooltip
+                .on("mouseover", function(d) {
+                    tooltip.transition()
+                    .duration(200)         // ms delay before appearing
+                    .style("opacity", .8); // tooltip appears on mouseover
+                    tooltip.html(d[variables] + " " + "<br/>(" + xValue(d)+ ", " + yValue(d) + ")")
+                    .style("left", (d3.event.pageX + 10) + "px")  // specify x location
+                    .style("top", (d3.event.pageY - 28) + "px");  // specify y location
+                })
+                .on("mouseout", function(d) {
+                    tooltip.transition()
+                    .duration(500)
+                    .style("opacity", 0); // disappear on mouseout
+                });
+                */
+        }
+    }
+    //temp_dot=[];
 });
 
 //Point cluster_mouseover
 $("div").on("mouseout",".point_cluster",function(){
-   let text = $(this).text();
-    console.log(" oncall 24 hours out");
+   //let coordinate = $(this).text().split(',');
+    //console.log(" oncall 24 hours out");
     //console.log(result_clustering);
+                g_body.selectAll(".dot_cluster1")
+                .data(temp_dot)
+                .enter()
+                .append("circle")
+                .attr("class", "dot_cluster1")
+                .attr("r", 5)
+                .attr("cx", function(d){
+                    //console.log(d['cx']);
+                    return d['cx'];
+                })
+                .attr("cy", function(d){
+                    //console.log(d['cy']);
+                    return d['cy'];
+                })
+                .style("fill", function(d) {
+                    //console.log(" remove out over ");
+                    return "rgb(31, 119, 180)"; 
+                })
 });
 
 
@@ -1295,7 +1408,7 @@ $("#submit").on("click",function(){
             "In this chart, the relationship between <b>"+ x_axis_title +"</b> and <b>"+ y_axis_title +"</b> for <b>"+ legend_var.length +" "+ variables + "</b> is being investigated. <b>"+ 
             x_axis_title + "</b> can range from <b>"+ min_x() + "</b> to <b>"+ max_x() +"</b> and <b>"+ y_axis_title + "</b> in this chart range from <b>"+ min_y() + "</b> to <b>"+ max_y() +"</b>. "+"<br/>"+"<br/>"
             +
-            "<b>Correlaion:</b> </br> </br>"
+            "<b>Correlation:</b> </br> </br>"
             +
             print_correlation()
             +
