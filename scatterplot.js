@@ -22,9 +22,9 @@ var g_title= svg.append("g")
 
 //title of x_axis
 var g_x_axis_title = svg.append("g")
-    .attr("transform","translate("+480+","+680+")")
+    .attr("transform","translate("+490+","+680+")")
     .append("text")
-    .attr("font-size", 18)
+    .attr("font-size", 19)
     .attr("fill","#1f375a")
    // .text(x_axis_title)
 
@@ -32,7 +32,7 @@ var g_x_axis_title = svg.append("g")
 var g_y_axis_title = svg.append("g")
     .attr("transform","translate("+30+","+400+")")
     .append("text")
-    .attr("font-size", 18)
+    .attr("font-size", 19)
     .attr("transform", "rotate(-90)")
     .attr("fill","#1f375a")
   //  .text(y_axis_title)
@@ -42,7 +42,7 @@ var tooltip = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
 
-var chart_title="Title of Scatterplot Chart";
+var chart_title="Scatterplot Chart";
 var x_axis_title="";
 var y_axis_title="";
 var variables="";
@@ -57,7 +57,7 @@ var dot_set=[];
 var dot_point={};
 
 // load data
-d3.csv("https://gist.githubusercontent.com/chuikokching/2dbf88fbfb1232de3f3fc7a211b4f32a/raw/f68449095e03fbb49b7e31bb3a8150f03fd839b7/Income_Life.csv").then(function(data) {
+d3.csv("https://gist.githubusercontent.com/chuikokching/73772b5eda16720151f4f1b8c1ace8c1/raw/45b712c0f26c4bcf3f66a4eced1152e34eb92d49/student_GPA_1.csv").then(function(data) {
     //console.log(data.columns[0]+ " "+data.columns[1]+ " "+data.columns[2]);
 
     jsonList_copy=data;
@@ -234,28 +234,29 @@ function print_correlation()
 
     if(var_linear.length!=0)
     {     
-        text=text +" We observed that there is a linear correlation between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b>  for <b>"+ var_linear.length +"</b> <b>"+ variables+"</b>. </br>";
+        
         if(var_linear.length==1)
         {
-            text = text + "<b>"+variables+ " "+var_linear[0].var + "</b> has a ";
+            text=text +" We observed that there is a ";
+            
             if(var_linear[0].value_correlation>=0)
             {
                 if((0.3<=var_linear[0].value_correlation&&var_linear[0].value_correlation<0.5))
-                    text= text+"weak ";
+                    text= text+"<b>weak ";
                 if((0.5<=var_linear[0].value_correlation&&var_linear[0].value_correlation<0.7))
-                    text= text+"moderate ";
+                    text= text+"<b>moderate ";
                 if((var_linear[0].value_correlation>=0.7))
-                    text= text+"strong ";
+                    text= text+"<b>strong ";
             }
             else{
                 if((var_linear[0].value_correlation<=-0.3&&var_linear[0].value_correlation>-0.5))
-                    text= text+"weak ";
+                    text= text+"<b>weak ";
                 if((var_linear[0].value_correlation<=-0.5&&var_linear[0].value_correlation>-0.7))
-                    text= text+"moderate ";
+                    text= text+"<b>moderate ";
                 if((var_linear[0].value_correlation<=-0.7))
-                    text= text+"strong ";
+                    text= text+"<b>strong ";
             }   
-                text = text +" linear correlation. ("+var_linear[0].value_correlation+" , "+var_linear[0].association +")</br>";
+                text = text + var_linear[0].association+"</b> linear correlation (<b>"+var_linear[0].value_correlation+"</b>) between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b>. </br>";;
             if(var_non_linear.length!=0)
             {
                 text=text + "In addition, there are <b>" + var_non_linear.length+ " "+variables+ "</b> where there is no linear correlation.</br>";
@@ -263,6 +264,7 @@ function print_correlation()
         }
         else
         {
+            text=text +" We observed that there is a linear correlation between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b>  for <b>"+ var_linear.length +"</b> <b>"+ variables+"</b>. </br>";
             min_pos=0;
             min=parseFloat(var_linear[0].value_correlation);
             max_pos=0;
@@ -283,8 +285,8 @@ function print_correlation()
                     
             }
             //console.log(min_pos + " : " + max_pos + " min and max");
-            text = text + "<b>"+variables+ " "+var_linear[max_pos].var + "</b> has <b>maximum "+max+ "</b> value of correlation. ("+var_linear[max_pos].association +")</br>";
-            text = text + "<b>"+variables+ " "+var_linear[min_pos].var + "</b> has <b>minimum "+min+ "</b> value of correlation. ("+var_linear[min_pos].association +")</br>";
+            text = text + "<b>"+variables+ " "+var_linear[max_pos].var + "</b> has a <b>max value ("+max+")</b> of <b>"+var_linear[max_pos].association +"</b> correlation. </br>";
+            text = text + "<b>"+variables+ " "+var_linear[min_pos].var + "</b> has a <b>min value ("+min+")</b> of <b>"+var_linear[min_pos].association +"</b> correlation. </br>";
             if(var_non_linear.length!=0)
             {
                 text=text + "In addition, there are " + var_non_linear.length+ " "+variables+ " where there is no linear correlation.</br>";
@@ -594,7 +596,7 @@ function print_outliers()
                                              //console.log(point.position+ " "+ point.var + " "+outliers_array[z].position + " " + outliers_array[z].var);
                                             if(point.position==outliers_array[z].position&&point.var==outliers_array[z].var)
                                             {
-                                                //console.log(" gooooooooooooooooooo !!!!!!!!!!!!" );
+
                                                   set = 1;
                                             }                                               
                                         }
@@ -653,7 +655,7 @@ function print_outliers()
 
         for(let h=0;h<outliers_array.length;h++)
         {
-            text = text + "<b>["+ outliers_array[h].var +": "+ outliers_array[h].x+ ", "+outliers_array[h].y + "]</b>" + ". ";
+            text = text + "[<span class=\"point_outliers\"><b>"+ outliers_array[h].var +":"+ outliers_array[h].x+ ", "+outliers_array[h].y + "</span></b>]. ";
         }
 
         text = text +"</br>";
@@ -701,7 +703,7 @@ function print_clustering()
         
         for(let q=0;q<result_clustering.centroids.length;q++)
         {
-            text=text+"Cluster sizes of centroid [<span class=\"point_cluster\"><b>"+ result_clustering.clusters[q].centroid[0].toFixed(3)+","+result_clustering.clusters[q].centroid[1].toFixed(3)+ "</b></span>] is <b>"+result_clustering.clusters[q].points.length + "</b>.  ("+ result_clustering.clusters[q].points.length+" data points)</br>";
+            text=text+"Cluster sizes of centroid [<span class=\"point_cluster\"><b>"+cluster_data[o].individual +":"+ result_clustering.clusters[q].centroid[0].toFixed(3)+","+result_clustering.clusters[q].centroid[1].toFixed(3)+ "</b></span>] is <b>"+result_clustering.clusters[q].points.length + "</b>.  ("+ result_clustering.clusters[q].points.length+" data points)</br>";
         }
         text=text+"</br>";
   
@@ -1246,28 +1248,38 @@ $("#infos").on("click",function(){
    );
 });
 
-var temp_dot=[];
+
+var temp_dot_outliers=[];
+//Point outliers_mouseover
+$("div").on("mouseover",".point_outliers",function(){
+    
+});
+
+
+//Point outliers_mouseover
+$("div").on("mouseout",".point_outliers",function(){
+
+});
+
+
+var temp_dot_cluster=[];
 //Point cluster_mouseover
 $("div").on("mouseover",".point_cluster",function(){
    let coordinate = $(this).text().split(',');
-    //console.log(result_clustering);
+   //console.log(result_clustering);
     let dataset;
-    //let dataset_x=[];
-    //let dataset_y=[];
-    //let temp_dot=[];
+
     let temp_point={};
+    
     for(let k=0;k<result_clustering.clusters.length;k++)
     {
-        //console.log(result_clustering.clusters[k].centroid[0].toFixed(3) + " "+ text[0] +" : "+ result_clustering.clusters[k].centroid[1]+ " " +text[1] );
+        //console.log(k+ "  "+ result_clustering.clusters[k].centroid[0].toFixed(3)+" :  "+result_clustering.clusters[k].centroid[1].toFixed(3)+"        "+coordinate[0] +" : "+ coordinate[1] );
         if((result_clustering.clusters[k].centroid[0].toFixed(3)==coordinate[0])&&(result_clustering.clusters[k].centroid[1].toFixed(3)==coordinate[1]))
         {
-             
             dataset = result_clustering.clusters[k].points;
 
             for(let i=0;i<dataset.length;i++)
             {
-                //dataset_x.push(dataset[i][0]);
-                //dataset_y.push(dataset[i][1]);
                 for(let z=0;z<dot_set.length;z++)
                 {
                     if((dataset[i][0]==dot_set[z].x) && (dataset[i][1]==dot_set[z].y))
@@ -1277,19 +1289,20 @@ $("div").on("mouseover",".point_cluster",function(){
                         temp_point['cx']=dot_set[z].cx;
                         temp_point['y']=dot_set[z].y;
                         temp_point['cy']=dot_set[z].cy;
-                        temp_dot.push(temp_point);
+                        temp_dot_cluster.push(temp_point);
                         temp_point={};
                     }
 
                 }
             }
             //console.log(dataset);
-            console.log(temp_dot);
+            //console.log(temp_dot);
 
             // draw dots
             g_body.selectAll(".dot_cluster")
-                .data(temp_dot)
-                .enter().append("circle")
+                .data(temp_dot_cluster)
+                .enter()
+                .append("circle")
                 .attr("class", "dot_cluster")
                 .attr("r", 5)
                 .attr("cx", function(d){
@@ -1304,13 +1317,39 @@ $("div").on("mouseover",".point_cluster",function(){
                     //console.log(d['x']+ " text in dots ");
                     return "black"; 
                 })
-                /*
-                // tooltip
+                
+
+                
+        }
+    }
+});
+
+//Point cluster_mouseout
+$("div").on("mouseout",".point_cluster",function(){
+   //let coordinate = $(this).text().split(',');
+    g_body.selectAll(".dot_cluster1")
+          .data(temp_dot_cluster)
+        .enter()
+        .append("circle")
+        .attr("class", "dot_cluster1")
+        .attr("r", 5)
+        .attr("cx", function(d){
+            //console.log(d['cx']);
+            return d['cx'];
+        })
+        .attr("cy", function(d){
+            //console.log(d['cy']);
+            return d['cy'];
+        })
+        .style("fill", function(d) {
+            //console.log(" remove out over ");
+            return "rgb(31, 119, 180)"; 
+        })                // tooltip
                 .on("mouseover", function(d) {
                     tooltip.transition()
                     .duration(200)         // ms delay before appearing
                     .style("opacity", .8); // tooltip appears on mouseover
-                    tooltip.html(d[variables] + " " + "<br/>(" + xValue(d)+ ", " + yValue(d) + ")")
+                    tooltip.html(d['var'] + " " + "<br/>(" + d['x']+ ", " + d['y'] + ")")
                     .style("left", (d3.event.pageX + 10) + "px")  // specify x location
                     .style("top", (d3.event.pageY - 28) + "px");  // specify y location
                 })
@@ -1319,35 +1358,7 @@ $("div").on("mouseover",".point_cluster",function(){
                     .duration(500)
                     .style("opacity", 0); // disappear on mouseout
                 });
-                */
-        }
-    }
-    //temp_dot=[];
-});
 
-//Point cluster_mouseover
-$("div").on("mouseout",".point_cluster",function(){
-   //let coordinate = $(this).text().split(',');
-    //console.log(" oncall 24 hours out");
-    //console.log(result_clustering);
-                g_body.selectAll(".dot_cluster1")
-                .data(temp_dot)
-                .enter()
-                .append("circle")
-                .attr("class", "dot_cluster1")
-                .attr("r", 5)
-                .attr("cx", function(d){
-                    //console.log(d['cx']);
-                    return d['cx'];
-                })
-                .attr("cy", function(d){
-                    //console.log(d['cy']);
-                    return d['cy'];
-                })
-                .style("fill", function(d) {
-                    //console.log(" remove out over ");
-                    return "rgb(31, 119, 180)"; 
-                })
 });
 
 
@@ -1396,7 +1407,7 @@ $("#submit").on("click",function(){
 
         //var b=[94,73,59,80,93,85,66,79,77,91];
         console.log(jsonArray_all);
-        //console.log(Outliers_regression_analysis(c,d))
+
         //console.log(Outliers_IQR(d));
         //console.log(Outliers_ZScore(d));
 
