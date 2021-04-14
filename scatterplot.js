@@ -57,7 +57,7 @@ var dot_set=[];
 var dot_point={};
 
 // load data
-d3.csv("https://gist.githubusercontent.com/chuikokching/73772b5eda16720151f4f1b8c1ace8c1/raw/45b712c0f26c4bcf3f66a4eced1152e34eb92d49/student_GPA_1.csv").then(function(data) {
+d3.csv("https://gist.githubusercontent.com/chuikokching/2dbf88fbfb1232de3f3fc7a211b4f32a/raw/f68449095e03fbb49b7e31bb3a8150f03fd839b7/Income_Life.csv").then(function(data) {
     //console.log(data.columns[0]+ " "+data.columns[1]+ " "+data.columns[2]);
 
     jsonList_copy=data;
@@ -304,13 +304,13 @@ function print_correlation()
     return text;
 }
 
+var outliers_array=[];
 function print_outliers()
 {
     var text = "</br></br>";
 
     text = text +"<b>Outliers:</b>" + "<br/>"+"<br/>"
 
-    var outliers_array=[];
     var outliers_array_copy=[];
     var outliers_x_axis=[];
     var outliers_y_axis=[];
@@ -376,7 +376,7 @@ function print_outliers()
         }
     }
 
-    var set=0;
+
     if(var_weak.length!=0)
     {
         for(let k=0;k<var_weak.length;k++)
@@ -385,132 +385,14 @@ function print_outliers()
             {
                 if(var_weak[k]==jsonArray_all[b].var)
                 {
-                    /*outliers_array_copy= jsonArray_all[b].x_array;
-                    outliers_x_axis= Outliers_ZScore(jsonArray_all[b].x_array);
-                    if(outliers_x_axis.length!=0)
-                    {
-                        for(let f=0;f<outliers_x_axis.length;f++)
-                        {
-                            for(let a=0;a<outliers_array_copy.length;a++)
-                            {
-                                if(outliers_x_axis[f]==outliers_array_copy[a])
-                                {
-                                    point["var"]=jsonArray_all[b].var;
-                                    point["x"]=jsonArray_all[b].x_array[a];
-                                    point["y"]=jsonArray_all[b].y_array[a];
-                                    outliers_array.push(point);
-                                    point={};
-                                }
-                            }
-                        }
-                    }
-
-                    outliers_x_axis= Outliers_IQR(jsonArray_all[b].x_array);
-                    if(outliers_x_axis.length!=0)
-                    {
-                        for(let f=0;f<outliers_x_axis.length;f++)
-                        {
-                            for(let a=0;a<outliers_array_copy.length;a++)
-                            {
-                                if(outliers_x_axis[f]==outliers_array_copy[a])
-                                {
-                                    point["var"]=jsonArray_all[b].var;
-                                    point["x"]=jsonArray_all[b].x_array[a];
-                                    point["y"]=jsonArray_all[b].y_array[a];
-                                    outliers_array.push(point);
-                                    point={};
-                                }
-                            }
-                        }
-                    }
-                    */
-                    outliers_array_copy= jsonArray_all[b].y_array;
-                    outliers_y_axis= Outliers_ZScore(jsonArray_all[b].y_array);
-                    if(outliers_y_axis.length!=0)
-                    {
-                        for(let f=0;f<outliers_y_axis.length;f++)
-                        {
-                            for(let a=0;a<outliers_array_copy.length;a++)
-                            {
-                                if(outliers_y_axis[f]==outliers_array_copy[a])
-                                {
-                                    point["var"]=jsonArray_all[b].var;
-                                    point["x"]=jsonArray_all[b].x_array[a];
-                                    point["y"]=jsonArray_all[b].y_array[a];
-                                    point["position"]=a;
-                                    if(outliers_array.length==0)
-                                    outliers_array.push(point);
-                                    else
-                                    {
-                                        for(let z=0;z<outliers_array.length;z++)
-                                        {
-                                            //console.log(point.position+ " "+ point.var + " "+outliers_array[z].position + " " + outliers_array[z].var);
-                                            if(point.position==outliers_array[z].position&&point.var==outliers_array[z].var)
-                                                set = 1;
-                                        }
-                                        if(set ==0)
-                                            outliers_array.push(point);
-
-                                    }
-                                    point={};
-                                    set = 0;
-                                }
-                            }
-                        }
-                    }
-                    console.log(outliers_y_axis + " weak ZScore !!!!!!!!!!!!!!!!");
-                    outliers_y_axis= Outliers_IQR(jsonArray_all[b].y_array);
-                    if(outliers_y_axis.length!=0)
-                    {
-                        for(let f=0;f<outliers_y_axis.length;f++)
-                        {
-                            for(let a=0;a<outliers_array_copy.length;a++)
-                            {
-                                if(outliers_y_axis[f]==outliers_array_copy[a])
-                                {
-                                    point["var"]=jsonArray_all[b].var;
-                                    point["x"]=jsonArray_all[b].x_array[a];
-                                    point["y"]=jsonArray_all[b].y_array[a];
-                                    point["position"]=a;
-                                    if(outliers_array.length==0)
-                                    outliers_array.push(point);
-                                    else
-                                    {
-                                        for(let z=0;z<outliers_array.length;z++)
-                                        {
-                                            //console.log(point.position+ " "+ point.var + " "+outliers_array[z].position + " " + outliers_array[z].var);
-                                            if(point.position==outliers_array[z].position&&point.var==outliers_array[z].var)
-                                                set = 1;
-                                        }
-                                        if(set ==0)
-                                            outliers_array.push(point);
-
-                                    }
-                                    point={};
-                                    set = 0;
-                                }
-                            }
-                        }
-                    }
-                    console.log(outliers_y_axis + " weak IQR !!!!!!!!!!!!!!!!!!!!");
-
-                }
-            }                      
-        }
-        /*for(let k=0;k<var_weak.length;k++)
-        {
-            for(let b=0;b<jsonArray_all.length;b++)
-            {
-                if(var_weak[k]==jsonArray_all[b].var)
-                {
                     regression_copy=Outliers_regression_analysis(jsonArray_all[b].x_array,jsonArray_all[b].y_array);
-                    console.log(regression_copy +  " regresion l and a ");
+                    //console.log(regression_copy +  " regresion l and a ");
                     for(let a=0;a<jsonArray_all[b].x_array.length;a++)
                     {
                         value=jsonArray_all[b].x_array[a]*regression_copy[0]+regression_copy[1];
-                        if(rate(jsonArray_all[b].y_array[a],value)=="outlier")
+                        if(rate_weak(jsonArray_all[b].y_array[a],value)=="outlier")
                         {
-                                console.log("outliers:  value "+ value + " y: "+ jsonArray_all[b].y_array[a] + " x: "+ jsonArray_all[b].x_array[a]);
+                                //console.log("outliers:  value "+ value + " y: "+ jsonArray_all[b].y_array[a] + " x: "+ jsonArray_all[b].x_array[a]);
                                 point["var"]=jsonArray_all[b].var;
                                 point["x"]=jsonArray_all[b].x_array[a];
                                 point["y"]=jsonArray_all[b].y_array[a];
@@ -519,13 +401,11 @@ function print_outliers()
                         }
                     }
                 }
-            }
-                                 
-        } */
-
-
+            }                        
+        }
     }
 
+    var set=0;
     if(var_non_linear.length!=0)
     {//!!!!!!!!!!!**********************
         for(let k=0;k<var_non_linear.length;k++)
@@ -655,7 +535,7 @@ function print_outliers()
 
         for(let h=0;h<outliers_array.length;h++)
         {
-            text = text + "[<span class=\"point_outliers\"><b>"+ outliers_array[h].var +":"+ outliers_array[h].x+ ", "+outliers_array[h].y + "</span></b>]. ";
+            text = text + "[<span class=\"point_outliers\"><b>"+ outliers_array[h].var +":"+ outliers_array[h].x+ ","+outliers_array[h].y + "</span></b>]. ";
         }
 
         text = text +"</br>";
@@ -668,6 +548,7 @@ function print_outliers()
     return text;
 }
 
+var result_clustering_all=[];
 var result_clustering;
 function print_clustering()
 {
@@ -699,6 +580,8 @@ function print_clustering()
     {
         result_clustering=kmeans(cluster_data[o].data,3)
         //console.log(result.centroids);
+        result_clustering['var']=cluster_data[o].individual;
+        result_clustering_all.push(result_clustering);
         text=text+"We observed that there are <b>"+result_clustering.centroids.length+ " clusters</b> " + "for <b>"+cluster_data[o].individual + "</b>, their details are as follows: </br></br> "
         
         for(let q=0;q<result_clustering.centroids.length;q++)
@@ -710,14 +593,33 @@ function print_clustering()
     }
 
     //let result = kmeans(cluster_data[0].data,3);
-    //console.log(result_clustering.centroids);
+    //console.log(result_clustering_all);
     //console.log(result_clustering.clusters);
     
     return text;
 }
 
 
+function rate_weak(y,value)
+{
+    if(y!=0 && value!=0)
+    {
+    if(y>=value)
+    {
+        if(y/value > 1.78 )
+        return "outlier";
+        else
+            return "not_outlier"
+    }
+    else{
+        if(value/y > 1.78 )
+        return "outlier";
+        else
+         return "not_outlier"
+    }
+    }
 
+}
 
 function rate(y,value)
 {
@@ -725,13 +627,13 @@ function rate(y,value)
     {
     if(y>=value)
     {
-        if(y/value > 1.65 )
+        if(y/value > 1.68 )
         return "outlier";
         else
             return "not_outlier"
     }
     else{
-        if(value/y > 1.65 )
+        if(value/y > 1.68 )
         return "outlier";
         else
          return "not_outlier"
@@ -1252,37 +1154,139 @@ $("#infos").on("click",function(){
 var temp_dot_outliers=[];
 //Point outliers_mouseover
 $("div").on("mouseover",".point_outliers",function(){
-    
+    let coordinate = $(this).text().split(/[,:]/);
+    let temp_point={};
+    console.log(coordinate);
+    for(let i=0;i<outliers_array.length;i++)
+    {
+        if((outliers_array[i].var==coordinate[0]) && (outliers_array[i].x==coordinate[1]) && (outliers_array[i].y==coordinate[2]))
+        {
+            for(let z=0;z<dot_set.length;z++)
+            {
+                if((outliers_array[i].var==dot_set[z].var) && (outliers_array[i].x==dot_set[z].x) && (outliers_array[i].y==dot_set[z].y))
+                {
+                    temp_point['var']=dot_set[z].var;
+                    temp_point['x']=dot_set[z].x;
+                    temp_point['cx']=dot_set[z].cx;
+                    temp_point['y']=dot_set[z].y;
+                    temp_point['cy']=dot_set[z].cy;
+                    temp_dot_outliers.push(temp_point);
+                    temp_point={};
+                }
+            } 
+        }
+    }
+    console.log(temp_dot_outliers);
+
+    g_body.selectAll(".dot_outliers")
+    .data(temp_dot_outliers)
+    .enter()
+    .append("circle")
+    .attr("class", "dot_outliers")
+    .attr("r", 10)
+    .attr("cx", function(d){
+        //console.log(d['cx']);
+        return d['cx'];
+    })
+    .attr("cy", function(d){
+        //console.log(d['cy']);
+        return d['cy'];
+    })
+    .style("fill", function(d) {
+        if(d['var']==legend_var[0])
+            return "rgb(31, 119, 180)";
+        if(d['var']==legend_var[1])
+            return "rgb(255, 127, 14)";
+        if(d['var']==legend_var[2])
+            return "rgb(44, 160, 44)";
+        if(d['var']==legend_var[3])
+            return "rgb(214, 39, 40)";
+        if(d['var']==legend_var[4])
+            return "rgb(148, 103, 189)";
+        if(d['var']==legend_var[5])
+            return "rgb(140, 86, 75)";
+        return "black";
+    })
+
 });
 
 
 //Point outliers_mouseover
 $("div").on("mouseout",".point_outliers",function(){
-
+    g_body.selectAll(".dot_outliers").remove();
+    temp_dot_outliers=[];
+          /*.data(temp_dot_outliers)
+        .enter()
+        .append("circle")
+        .attr("class", "dot_outliers1")
+        .attr("r", 5)
+        .attr("cx", function(d){
+            //console.log(d['cx']);
+            return d['cx'];
+        })
+        .attr("cy", function(d){
+            //console.log(d['cy']);
+            return d['cy'];
+        })
+        .style("fill", function(d) {
+        if(d['var']==legend_var[0])
+            return "rgb(31, 119, 180)";
+        if(d['var']==legend_var[1])
+            return "rgb(255, 127, 14)";
+        if(d['var']==legend_var[2])
+            return "rgb(44, 160, 44)";
+        if(d['var']==legend_var[3])
+            return "rgb(214, 39, 40)";
+        if(d['var']==legend_var[4])
+            return "rgb(148, 103, 189)";
+        if(d['var']==legend_var[5])
+            return "rgb(140, 86, 75)";
+        //return "black";
+        })                
+        // tooltip
+        .on("mouseover", function(d) {
+            tooltip.transition()
+            .duration(200)         // ms delay before appearing
+            .style("opacity", .8); // tooltip appears on mouseover
+            tooltip.html(d['var'] + " " + "<br/>(" + d['x']+ ", " + d['y'] + ")")
+            .style("left", (d3.event.pageX + 10) + "px")  // specify x location
+            .style("top", (d3.event.pageY - 28) + "px");  // specify y location
+        })
+        .on("mouseout", function(d) {
+            tooltip.transition()
+            .duration(500)
+            .style("opacity", 0); // disappear on mouseout
+        });*/
 });
 
 
 var temp_dot_cluster=[];
 //Point cluster_mouseover
 $("div").on("mouseover",".point_cluster",function(){
-   let coordinate = $(this).text().split(',');
-   //console.log(result_clustering);
-    let dataset;
+   let coordinate = $(this).text().split(/[,:]/);
+   //console.log(result_clustering_all);
+    let dataset={};
 
     let temp_point={};
     
-    for(let k=0;k<result_clustering.clusters.length;k++)
+    for(let z=0;z<result_clustering_all.length;z++)
     {
-        //console.log(k+ "  "+ result_clustering.clusters[k].centroid[0].toFixed(3)+" :  "+result_clustering.clusters[k].centroid[1].toFixed(3)+"        "+coordinate[0] +" : "+ coordinate[1] );
-        if((result_clustering.clusters[k].centroid[0].toFixed(3)==coordinate[0])&&(result_clustering.clusters[k].centroid[1].toFixed(3)==coordinate[1]))
+        for(let k=0;k<result_clustering_all[z].clusters.length;k++)
         {
-            dataset = result_clustering.clusters[k].points;
+                    //console.log(k+ "  "+ result_clustering.clusters[k].centroid[0].toFixed(3)+" :  "+result_clustering.clusters[k].centroid[1].toFixed(3)+"        "+coordinate[0] +" : "+ coordinate[1] );
+        if((result_clustering_all[z].var==coordinate[0])&&
+            (result_clustering_all[z].clusters[k].centroid[0].toFixed(3)==parseFloat(coordinate[1]))&&
+            (result_clustering_all[z].clusters[k].centroid[1].toFixed(3)==parseFloat(coordinate[2])))
+        {
+            dataset['point'] = result_clustering_all[z].clusters[k].points;
+            dataset['var'] = coordinate[0];
 
-            for(let i=0;i<dataset.length;i++)
+
+            for(let i=0;i<dataset.point.length;i++)
             {
                 for(let z=0;z<dot_set.length;z++)
                 {
-                    if((dataset[i][0]==dot_set[z].x) && (dataset[i][1]==dot_set[z].y))
+                    if((dataset.var ==dot_set[z].var)&&(dataset.point[i][0]==dot_set[z].x) && (dataset.point[i][1]==dot_set[z].y))
                     {
                         temp_point['var']=dot_set[z].var;
                         temp_point['x']=dot_set[z].x;
@@ -1295,40 +1299,51 @@ $("div").on("mouseover",".point_cluster",function(){
 
                 }
             }
-            //console.log(dataset);
-            //console.log(temp_dot);
-
-            // draw dots
-            g_body.selectAll(".dot_cluster")
-                .data(temp_dot_cluster)
-                .enter()
-                .append("circle")
-                .attr("class", "dot_cluster")
-                .attr("r", 5)
-                .attr("cx", function(d){
-                    //console.log(d['cx']);
-                    return d['cx'];
-                })
-                .attr("cy", function(d){
-                    //console.log(d['cy']);
-                    return d['cy'];
-                })
-                .style("fill", function(d) {
-                    //console.log(d['x']+ " text in dots ");
-                    return "black"; 
-                })
-                
-
-                
+         }
         }
+
     }
+
+    console.log(temp_dot_cluster);
+        // draw dots
+    g_body.selectAll(".dot_cluster")
+        .data(temp_dot_cluster)
+        .enter()
+        .append("circle")
+        .attr("class", "dot_cluster")
+        .attr("r", 5)
+        .attr("cx", function(d){
+            //console.log(d['cx']);
+            return d['cx'];
+        })
+        .attr("cy", function(d){
+            //console.log(d['cy']);
+            return d['cy'];
+        })
+        .style("fill", function(d) {
+            if(d['var']==legend_var[0])
+                return "rgb(157, 209, 245)";
+            if(d['var']==legend_var[1])
+                return "rgb(250, 185, 127)";
+            if(d['var']==legend_var[2])
+                return "rgb(147, 245, 147)";
+            if(d['var']==legend_var[3])
+                return "rgb(245, 140, 140)";
+            if(d['var']==legend_var[4])
+                return "rbg(217, 180, 250)";
+            if(d['var']==legend_var[5])
+                return "rbg(250, 183, 170)";
+            return "black"; 
+        })
+                
 });
 
 //Point cluster_mouseout
 $("div").on("mouseout",".point_cluster",function(){
    //let coordinate = $(this).text().split(',');
-    g_body.selectAll(".dot_cluster1")
-          .data(temp_dot_cluster)
+    g_body.selectAll(".dot_cluster").remove();
+    temp_dot_cluster=[];
+          /*.data(temp_dot_cluster)
         .enter()
         .append("circle")
         .attr("class", "dot_cluster1")
@@ -1344,20 +1359,21 @@ $("div").on("mouseout",".point_cluster",function(){
         .style("fill", function(d) {
             //console.log(" remove out over ");
             return "rgb(31, 119, 180)"; 
-        })                // tooltip
-                .on("mouseover", function(d) {
-                    tooltip.transition()
-                    .duration(200)         // ms delay before appearing
-                    .style("opacity", .8); // tooltip appears on mouseover
-                    tooltip.html(d['var'] + " " + "<br/>(" + d['x']+ ", " + d['y'] + ")")
-                    .style("left", (d3.event.pageX + 10) + "px")  // specify x location
-                    .style("top", (d3.event.pageY - 28) + "px");  // specify y location
-                })
-                .on("mouseout", function(d) {
-                    tooltip.transition()
-                    .duration(500)
-                    .style("opacity", 0); // disappear on mouseout
-                });
+        })                
+        // tooltip
+        .on("mouseover", function(d) {
+            tooltip.transition()
+            .duration(200)         // ms delay before appearing
+            .style("opacity", .8); // tooltip appears on mouseover
+            tooltip.html(d['var'] + " " + "<br/>(" + d['x']+ ", " + d['y'] + ")")
+            .style("left", (d3.event.pageX + 10) + "px")  // specify x location
+            .style("top", (d3.event.pageY - 28) + "px");  // specify y location
+        })
+        .on("mouseout", function(d) {
+            tooltip.transition()
+            .duration(500)
+            .style("opacity", 0); // disappear on mouseout
+        });*/
 
 });
 
@@ -1407,7 +1423,7 @@ $("#submit").on("click",function(){
 
         //var b=[94,73,59,80,93,85,66,79,77,91];
         console.log(jsonArray_all);
-
+        //console.log(legend_var);
         //console.log(Outliers_IQR(d));
         //console.log(Outliers_ZScore(d));
 
