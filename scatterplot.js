@@ -57,12 +57,12 @@ var dot_set=[];
 var dot_point={};
 
 // load data
-d3.csv("https://gist.githubusercontent.com/chuikokching/2dbf88fbfb1232de3f3fc7a211b4f32a/raw/f68449095e03fbb49b7e31bb3a8150f03fd839b7/Income_Life.csv").then(function(data) {
+d3.csv("https://gist.githubusercontent.com/chuikokching/73772b5eda16720151f4f1b8c1ace8c1/raw/79f37d0dbdbfb8370563dc036655db824fb8c7e9/student_GPA_1.csv").then(function(data) {
     //console.log(data.columns[0]+ " "+data.columns[1]+ " "+data.columns[2]);
 
     jsonList_copy=data;
 
-    console.log(jsonList_copy);
+    //console.log(jsonList_copy);
 
     //set title of x and y axis
     variables = data.columns[0];
@@ -147,8 +147,7 @@ d3.csv("https://gist.githubusercontent.com/chuikokching/2dbf88fbfb1232de3f3fc7a2
                 .duration(500)
                 .style("opacity", 0); // disappear on mouseout
         });
-    //let column=["var","x","cx","y","cy"];
-    //dot_set.push(column);
+
     console.log(dot_set);
     
     // draw legend
@@ -183,8 +182,8 @@ function unique(arr) {
     }
     var array = [];
     for (var i = 0; i < arr.length; i++) {
-        if (array .indexOf(arr[i]) === -1) {
-            array .push(arr[i])
+        if (array.indexOf(arr[i]) === -1) {
+            array.push(arr[i])
         }
     }
     return array;
@@ -196,12 +195,17 @@ var var_strong=[];
 var var_moderate=[];
 var var_weak=[];
 var var_correlation={}
+var line=[];
+
 
 //traverse array
 function print_correlation()
 {
     var min,min_pos,max,max_pos;
     var text="";
+    var arr_all_y=[],arr_all_x=[];
+
+
     for(var i=0;i<jsonArray_all.length;i++)
     {
         if(correlation_coefficient_linear(jsonArray_all[i].x_array,jsonArray_all[i].y_array)=="linear")
@@ -209,6 +213,9 @@ function print_correlation()
             var_correlation["var"]=jsonArray_all[i].var;
             var_correlation["value_correlation"]=correlation_coefficient(jsonArray_all[i].x_array,jsonArray_all[i].y_array);
             var_correlation["association"]=correlation_coefficient_association(jsonArray_all[i].x_array,jsonArray_all[i].y_array);
+            var_correlation["strength"]=correlation_coefficient_strength(jsonArray_all[i].x_array,jsonArray_all[i].y_array);
+            var_correlation["x_array"]=jsonArray_all[i].x_array;
+            var_correlation["y_array"]=jsonArray_all[i].y_array;
             var_linear.push(var_correlation);
             if(correlation_coefficient_strength(jsonArray_all[i].x_array,jsonArray_all[i].y_array)=="strong")
                 var_strong.push(jsonArray_all[i].var);
@@ -225,20 +232,22 @@ function print_correlation()
         }
     }
 
-    //console.log(var_strong + " strong");
-    //console.log(var_moderate+ " moderate");
-    //console.log(var_weak+ " weak");
-    //console.log(var_non_linear + " var_non_linear");
 
-    //console.log(var_linear);
+    for(var p=0;p<jsonArray_all.length;p++)
+    {
+        for(var h=0;h<jsonArray_all[p].x_array.length;h++)
+        {
+            arr_all_x.push(parseFloat(jsonArray_all[p].x_array[h]));
+            arr_all_y.push(parseFloat(jsonArray_all[p].y_array[h]));
+        }
+    }
 
-    if(var_linear.length!=0)
-    {     
-        
+    if((correlation_coefficient_linear(arr_all_x,arr_all_y)=="linear"))
+    {
         if(var_linear.length==1)
         {
-            text=text +" We observed that there is a ";
-            
+            text=text +"We observed that <b>"+variables+ " "+var_linear[0].var + "</b> has a ";
+                
             if(var_linear[0].value_correlation>=0)
             {
                 if((0.3<=var_linear[0].value_correlation&&var_linear[0].value_correlation<0.5))
@@ -256,51 +265,95 @@ function print_correlation()
                 if((var_linear[0].value_correlation<=-0.7))
                     text= text+"<b>strong ";
             }   
-                text = text + var_linear[0].association+"</b> linear correlation (<b>"+var_linear[0].value_correlation+"</b>) between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b>. </br>";;
-            if(var_non_linear.length!=0)
-            {
-                text=text + "In addition, there are <b>" + var_non_linear.length+ " "+variables+ "</b> where there is no linear correlation.</br>";
-            }
+            text = text + var_linear[0].association+"</b> linear correlation (<b>"+Math.abs(var_linear[0].value_correlation)+"</b>) between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b>. </br>";
         }
         else
         {
-            text=text +" We observed that there is a linear correlation between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b>  for <b>"+ var_linear.length +"</b> <b>"+ variables+"</b>. </br>";
-            min_pos=0;
-            min=parseFloat(var_linear[0].value_correlation);
-            max_pos=0;
-            max=parseFloat(var_linear[0].value_correlation);
-            for(let k=1;k<var_linear.length;k++)
-            {
-                if(parseFloat(var_linear[k].value_correlation)>max)
-                {
-                    max_pos=k;
-                    max=parseFloat(var_linear[k].value_correlation);                    
-                }
-
-                if(parseFloat(var_linear[k].value_correlation)<min)
-                {
-                    min_pos=k;
-                    min=parseFloat(var_linear[k].value_correlation);
-                }  
-                    
-            }
-            //console.log(min_pos + " : " + max_pos + " min and max");
-            text = text + "<b>"+variables+ " "+var_linear[max_pos].var + "</b> has a <b>max value ("+max+")</b> of <b>"+var_linear[max_pos].association +"</b> correlation. </br>";
-            text = text + "<b>"+variables+ " "+var_linear[min_pos].var + "</b> has a <b>min value ("+min+")</b> of <b>"+var_linear[min_pos].association +"</b> correlation. </br>";
-            if(var_non_linear.length!=0)
-            {
-                text=text + "In addition, there are " + var_non_linear.length+ " "+variables+ " where there is no linear correlation.</br>";
-            }
+            text = text +"We observed that there is a "+correlation_coefficient_association(arr_all_x,arr_all_y)+" "+correlation_coefficient_strength(arr_all_x,arr_all_y)+" linear correlation between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b> for overall data. </br>";
         }
     }
-
     else
     {
-        text = "There is <b>no linear correlation</b> between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b> in this dataset! </br></br>";
+        text = text +"We observed that there is no linear correlation between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b> for overall data. </br>";
     }
-    
 
 
+    //console.log(var_strong + " strong");
+    //console.log(var_moderate+ " moderate");
+    //console.log(var_weak+ " weak");
+    //console.log(var_non_linear + " var_non_linear");
+
+    //console.log(var_linear);
+
+    if(var_linear.length!=0&&var_linear.length>1)
+    {     
+        //text=text +" We observed that there is a linear correlation between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b>.</br>";
+        min_pos=0;
+        min=Math.abs(parseFloat(var_linear[0].value_correlation));
+        max_pos=0;
+        max=Math.abs(parseFloat(var_linear[0].value_correlation));
+        for(let k=1;k<var_linear.length;k++)
+        {
+            if(Math.abs(parseFloat(var_linear[k].value_correlation))>max)
+            {
+                max_pos=k;
+                max=Math.abs(parseFloat(var_linear[k].value_correlation));                    
+            }
+
+            if(Math.abs(parseFloat(var_linear[k].value_correlation))<min)
+            {
+                min_pos=k;
+                min=Math.abs(parseFloat(var_linear[k].value_correlation));
+            }  
+                
+        }
+        //console.log(min_pos + " : " + max_pos + " min and max");
+        text = text + "<span class=\"line_regression\"><b>"+variables+ " "+var_linear[max_pos].var + "</b></span> has a <b>"+var_linear[max_pos].strength+" "+var_linear[max_pos].association+"</b> (<b>"+max+"</b>) linear correlation. </br>";
+        text = text + "<span class=\"line_regression\"><b>"+variables+ " "+var_linear[min_pos].var + "</b></span> has a <b>"+var_linear[min_pos].strength+" "+var_linear[min_pos].association+"</b> (<b>"+min+"</b>) linear correlation. </br>";
+
+        var temp_line={};
+        var regression_copy=[];
+        arr_all_y=[];
+        regression_copy=Outliers_regression_analysis(var_linear[max_pos].x_array,var_linear[max_pos].y_array);
+        temp_line['var']=var_linear[max_pos].var;
+        temp_line['value']=parseFloat(var_linear[max_pos].value_correlation);
+
+        for(let e=0;e<var_linear[max_pos].x_array.length;e++)
+        {
+            arr_all_y.push((parseFloat(var_linear[max_pos].x_array[e])*regression_copy[0]+regression_copy[1]).toFixed(3));
+        }
+        temp_line['ry']=arr_all_y;
+        temp_line['x']=var_linear[max_pos].x_array;
+        temp_line['y']=var_linear[max_pos].y_array;
+        line.push(temp_line);
+        temp_line={};
+
+        arr_all_y=[];
+        regression_copy=Outliers_regression_analysis(var_linear[min_pos].x_array,var_linear[min_pos].y_array);
+        temp_line['var']=var_linear[min_pos].var;
+        temp_line['value']=parseFloat(var_linear[min_pos].value_correlation);
+        for(let e=0;e<var_linear[min_pos].x_array.length;e++)
+        {
+            arr_all_y.push((parseFloat(var_linear[min_pos].x_array[e])*regression_copy[0]+regression_copy[1]).toFixed(3));
+        }
+        temp_line['ry']=arr_all_y;
+        temp_line['x']=var_linear[min_pos].x_array;
+        temp_line['y']=var_linear[min_pos].y_array;
+        line.push(temp_line);
+        temp_line={};
+
+        console.log(line);
+
+        if(var_non_linear.length!=0)
+        {
+            text=text + "In addition, there are <b>" + var_non_linear.length+ " "+variables+ "</b> where there is no linear correlation.</br>";
+        }
+    }
+    if(var_linear.length==0&&var_non_linear.length!=0)
+    {
+        text = "There is <b>no linear correlation</b> between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b> for <b>"+var_non_linear+" "+variables+"</b>. </br></br>";
+    }
+ 
     return text;
 }
 
@@ -586,7 +639,7 @@ function print_clustering()
         
         for(let q=0;q<result_clustering.centroids.length;q++)
         {
-            text=text+"Cluster sizes of centroid [<span class=\"point_cluster\"><b>"+cluster_data[o].individual +":"+ result_clustering.clusters[q].centroid[0].toFixed(3)+","+result_clustering.clusters[q].centroid[1].toFixed(3)+ "</b></span>] is <b>"+result_clustering.clusters[q].points.length + "</b>.  ("+ result_clustering.clusters[q].points.length+" data points)</br>";
+            text=text+"Cluster sizes of centroid [<span class=\"point_cluster\"><b>"+cluster_data[o].individual +":"+ result_clustering.clusters[q].centroid[0].toFixed(3)+","+result_clustering.clusters[q].centroid[1].toFixed(3)+ "</b></span>] is <b>"+result_clustering.clusters[q].points.length + "</b>. </br>";
         }
         text=text+"</br>";
   
@@ -1150,6 +1203,22 @@ $("#infos").on("click",function(){
    );
 });
 
+//Line regression
+$("div").on("mouseover",".line_regression",function(){
+    let coordinate = $(this).text().split(' ');
+    console.log(coordinate);
+    g_body.append("line")
+            .attr("x1", 232.5)
+            .attr("y1", 309)
+            .attr("x2", 697.5)
+            .attr("y2", 5)
+            .attr("stroke", "black")
+            .attr("stroke-width", "2px");
+})
+
+$("div").on("mouseout",".line_regression",function(){
+
+})
 
 var temp_dot_outliers=[];
 //Point outliers_mouseover
