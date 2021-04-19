@@ -57,7 +57,7 @@ var dot_set=[];
 var dot_point={};
 
 // load data
-d3.csv("https://gist.githubusercontent.com/chuikokching/73772b5eda16720151f4f1b8c1ace8c1/raw/79f37d0dbdbfb8370563dc036655db824fb8c7e9/student_GPA_1.csv").then(function(data) {
+d3.csv("https://gist.githubusercontent.com/chuikokching/b0d0a6f6737e99beaf307281519c0197/raw/01bbd9c13d3fb67ab71e9fc4adc50e7cb4d6adb6/student_GPA_2.csv").then(function(data) {
     //console.log(data.columns[0]+ " "+data.columns[1]+ " "+data.columns[2]);
 
     jsonList_copy=data;
@@ -197,6 +197,7 @@ var var_weak=[];
 var var_correlation={}
 var line=[];
 
+function s(a,b){return a-b;}
 
 //traverse array
 function print_correlation()
@@ -204,7 +205,9 @@ function print_correlation()
     var min,min_pos,max,max_pos;
     var text="";
     var arr_all_y=[],arr_all_x=[];
-
+    var temp_line={};
+    var regression_copy=[];
+    var x_temp_array;
 
     for(var i=0;i<jsonArray_all.length;i++)
     {
@@ -246,7 +249,7 @@ function print_correlation()
     {
         if(var_linear.length==1)
         {
-            text=text +"We observed that <b>"+variables+ " "+var_linear[0].var + "</b> has a ";
+            text=text +"We observed that <span class=\"line_regression\"><b>"+variables+ " "+var_linear[0].var + "</b></span> has a ";
                 
             if(var_linear[0].value_correlation>=0)
             {
@@ -266,6 +269,23 @@ function print_correlation()
                     text= text+"<b>strong ";
             }   
             text = text + var_linear[0].association+"</b> linear correlation (<b>"+Math.abs(var_linear[0].value_correlation)+"</b>) between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b>. </br>";
+
+            arr_all_y=[];
+            regression_copy=Outliers_regression_analysis(var_linear[0].x_array,var_linear[0].y_array);
+            temp_line['var']=var_linear[0].var;
+            temp_line['value']=parseFloat(var_linear[0].value_correlation);
+            x_temp_array=var_linear[0].x_array;
+            x_temp_array= unique(x_temp_array);
+            x_temp_array.sort(s);
+
+            for(let e=0;e<x_temp_array.length;e++)
+            {
+                arr_all_y.push((parseFloat(x_temp_array[e])*regression_copy[0]+regression_copy[1]).toFixed(3));
+            }
+            temp_line['ry']=arr_all_y;
+            temp_line['x_temp']=x_temp_array;
+            line.push(temp_line);
+            temp_line={};
         }
         else
         {
@@ -311,20 +331,23 @@ function print_correlation()
         text = text + "<span class=\"line_regression\"><b>"+variables+ " "+var_linear[max_pos].var + "</b></span> has a <b>"+var_linear[max_pos].strength+" "+var_linear[max_pos].association+"</b> (<b>"+max+"</b>) linear correlation. </br>";
         text = text + "<span class=\"line_regression\"><b>"+variables+ " "+var_linear[min_pos].var + "</b></span> has a <b>"+var_linear[min_pos].strength+" "+var_linear[min_pos].association+"</b> (<b>"+min+"</b>) linear correlation. </br>";
 
-        var temp_line={};
-        var regression_copy=[];
+
         arr_all_y=[];
         regression_copy=Outliers_regression_analysis(var_linear[max_pos].x_array,var_linear[max_pos].y_array);
         temp_line['var']=var_linear[max_pos].var;
         temp_line['value']=parseFloat(var_linear[max_pos].value_correlation);
-
-        for(let e=0;e<var_linear[max_pos].x_array.length;e++)
+        x_temp_array=var_linear[max_pos].x_array;
+        x_temp_array= unique(x_temp_array);
+        x_temp_array.sort(s);
+        //console.log(x_temp_array);
+        for(let e=0;e<x_temp_array.length;e++)
         {
-            arr_all_y.push((parseFloat(var_linear[max_pos].x_array[e])*regression_copy[0]+regression_copy[1]).toFixed(3));
+            arr_all_y.push((parseFloat(x_temp_array[e])*regression_copy[0]+regression_copy[1]).toFixed(3));
         }
         temp_line['ry']=arr_all_y;
-        temp_line['x']=var_linear[max_pos].x_array;
-        temp_line['y']=var_linear[max_pos].y_array;
+        temp_line['x_temp']=x_temp_array;
+        //temp_line['x']=var_linear[max_pos].x_array;
+        //temp_line['y']=var_linear[max_pos].y_array;
         line.push(temp_line);
         temp_line={};
 
@@ -332,13 +355,17 @@ function print_correlation()
         regression_copy=Outliers_regression_analysis(var_linear[min_pos].x_array,var_linear[min_pos].y_array);
         temp_line['var']=var_linear[min_pos].var;
         temp_line['value']=parseFloat(var_linear[min_pos].value_correlation);
-        for(let e=0;e<var_linear[min_pos].x_array.length;e++)
+        x_temp_array=var_linear[min_pos].x_array;
+        x_temp_array= unique(x_temp_array);
+        x_temp_array.sort(s);
+        for(let e=0;e<x_temp_array.length;e++)
         {
-            arr_all_y.push((parseFloat(var_linear[min_pos].x_array[e])*regression_copy[0]+regression_copy[1]).toFixed(3));
+            arr_all_y.push((parseFloat(x_temp_array[e])*regression_copy[0]+regression_copy[1]).toFixed(3));
         }
         temp_line['ry']=arr_all_y;
-        temp_line['x']=var_linear[min_pos].x_array;
-        temp_line['y']=var_linear[min_pos].y_array;
+        temp_line['x_temp']=x_temp_array;
+        //temp_line['x']=var_linear[min_pos].x_array;
+        //temp_line['y']=var_linear[min_pos].y_array;
         line.push(temp_line);
         temp_line={};
 
@@ -1206,17 +1233,61 @@ $("#infos").on("click",function(){
 //Line regression
 $("div").on("mouseover",".line_regression",function(){
     let coordinate = $(this).text().split(' ');
-    console.log(coordinate);
-    g_body.append("line")
-            .attr("x1", 232.5)
-            .attr("y1", 309)
-            .attr("x2", 697.5)
-            .attr("y2", 5)
-            .attr("stroke", "black")
+    console.log(line);
+    console.log(dot_set);
+    let x1,y1,x2,y2;
+    let rate_regression=(Math.abs(dot_set[0].cy-dot_set[1].cy)/Math.abs(dot_set[0].y-dot_set[1].y)).toFixed(2);
+    //console.log(rate_regression);
+    for(let i=0;i<line.length;i++)
+    {
+        if(line[i].var==coordinate[1])
+        {
+            for(let k=0;k<dot_set.length;k++)
+            {
+                if(parseFloat(line[i].x_temp[0])==dot_set[k].x)
+                x1=parseFloat(dot_set[k].cx);
+
+                if(parseFloat(line[i].x_temp[line[i].x_temp.length-1])==dot_set[k].x)
+                x2=parseFloat(dot_set[k].cx);
+            }
+            
+            y1=parseFloat(line[i].ry[0]);
+            //console.log(y1 + " :y1");
+
+            y1=(dot_set[0].y-y1)*(rate_regression)+dot_set[0].cy;
+            y2=parseFloat(line[i].ry[line[i].ry.length-1]);
+            //console.log(y2 + " :y2");
+            y2=(dot_set[0].y-y2)*(rate_regression)+dot_set[0].cy;
+
+            //console.log(y1 + " :y1");
+            //console.log(y2 + " :y2");
+            g_body.append("line")
+            .attr("x1", x1)
+            .attr("y1", y1)
+            .attr("x2", x2)
+            .attr("y2", y2)
+            .attr("stroke", function(){
+                if(line[i].var==legend_var[0])
+                    return "rgb(31, 119, 180)";
+                if(line[i].var==legend_var[1])
+                    return "rgb(255, 127, 14)";
+                if(line[i].var==legend_var[2])
+                    return "rgb(44, 160, 44)";
+                if(line[i].var==legend_var[3])
+                    return "rgb(214, 39, 40)";
+                if(line[i].var==legend_var[4])
+                    return "rgb(148, 103, 189)";
+                if(line[i].var==legend_var[5])
+                    return "rgb(140, 86, 75)";
+                return "black";                
+            })
             .attr("stroke-width", "2px");
+        }
+    }
 })
 
 $("div").on("mouseout",".line_regression",function(){
+    g_body.selectAll("line").remove();
 
 })
 
@@ -1225,7 +1296,7 @@ var temp_dot_outliers=[];
 $("div").on("mouseover",".point_outliers",function(){
     let coordinate = $(this).text().split(/[,:]/);
     let temp_point={};
-    console.log(coordinate);
+    //console.log(coordinate);
     for(let i=0;i<outliers_array.length;i++)
     {
         if((outliers_array[i].var==coordinate[0]) && (outliers_array[i].x==coordinate[1]) && (outliers_array[i].y==coordinate[2]))
