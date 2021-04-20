@@ -57,7 +57,7 @@ var dot_set=[];
 var dot_point={};
 
 // load data
-d3.csv("https://gist.githubusercontent.com/chuikokching/b0d0a6f6737e99beaf307281519c0197/raw/01bbd9c13d3fb67ab71e9fc4adc50e7cb4d6adb6/student_GPA_2.csv").then(function(data) {
+d3.csv("https://gist.githubusercontent.com/chuikokching/321f63d7e2011f3eef09b92678b11b16/raw/72ef1e24b9d3e22c654e3530e2619ed830a1a630/data_cluster.csv").then(function(data) {
     //console.log(data.columns[0]+ " "+data.columns[1]+ " "+data.columns[2]);
 
     jsonList_copy=data;
@@ -86,7 +86,7 @@ d3.csv("https://gist.githubusercontent.com/chuikokching/b0d0a6f6737e99beaf307281
 
     // don't want dots overlapping axis, so add in buffer to data domain
     x.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
-    y.domain([0, d3.max(data, yValue)+1]);
+    y.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
 
     // Add x-axis.
     g_body.append("g")
@@ -556,8 +556,7 @@ function print_outliers()
                                              //console.log(point.position+ " "+ point.var + " "+outliers_array[z].position + " " + outliers_array[z].var);
                                             if(point.position==outliers_array[z].position&&point.var==outliers_array[z].var)
                                             {
-
-                                                  set = 1;
+                                                set = 1;
                                             }                                               
                                         }
                                         if(set ==0)
@@ -595,7 +594,6 @@ function print_outliers()
                                         }
                                         if(set ==0)
                                             outliers_array.push(point);
-
                                     }
                                     point={};
                                     set = 0;
@@ -654,8 +652,35 @@ function print_clustering()
         data={};
     }
 
+    let sse=[];
     console.log(cluster_data);
+    let sum_sse=0;
+    //Optimal K Value
+    for(let b=0;b<cluster_data.length;b++)
+    {
+        for(let f=1;f<=10;f++)
+        {
+            result_clustering=kmeans(cluster_data[b].data,f)
+            result_clustering['var']=cluster_data[b].individual;
+            
+            for(let t=0;t<result_clustering.clusters.length;t++)
+            {
+                for(let l=0;l<result_clustering.clusters[t].points.length;l++)
+                {
+                    sum_sse+=(Math.pow((result_clustering.clusters[t].points[l][0]-result_clustering.clusters[t].centroid[0].toFixed(3)),2))+(Math.pow((result_clustering.clusters[t].points[l][1]-result_clustering.clusters[t].centroid[1].toFixed(3)),2));
+                }
+
+            }
+            //result_clustering_all.push(result_clustering);  
+            sse.push(sum_sse.toFixed(3)); 
+            sum_sse=0;
+        }
+        console.log(sse);
+        sse=[];
+    }
+
     
+
     for(let o=0;o<cluster_data.length;o++)
     {
         result_clustering=kmeans(cluster_data[o].data,3)
@@ -673,7 +698,7 @@ function print_clustering()
     }
 
     //let result = kmeans(cluster_data[0].data,3);
-    //console.log(result_clustering_all);
+    console.log(result_clustering_all);
     //console.log(result_clustering.clusters);
     
     return text;
@@ -686,13 +711,13 @@ function rate_weak(y,value)
     {
     if(y>=value)
     {
-        if(y/value > 1.78 )
+        if(y/value > 1.79 )
         return "outlier";
         else
             return "not_outlier"
     }
     else{
-        if(value/y > 1.78 )
+        if(value/y > 1.79 )
         return "outlier";
         else
          return "not_outlier"
@@ -707,13 +732,13 @@ function rate(y,value)
     {
     if(y>=value)
     {
-        if(y/value > 1.68 )
+        if(y/value > 1.7 )
         return "outlier";
         else
             return "not_outlier"
     }
     else{
-        if(value/y > 1.68 )
+        if(value/y > 1.7 )
         return "outlier";
         else
          return "not_outlier"
@@ -1233,8 +1258,8 @@ $("#infos").on("click",function(){
 //Line regression
 $("div").on("mouseover",".line_regression",function(){
     let coordinate = $(this).text().split(' ');
-    console.log(line);
-    console.log(dot_set);
+    //console.log(line);
+    //console.log(dot_set);
     let x1,y1,x2,y2;
     let rate_regression=(Math.abs(dot_set[0].cy-dot_set[1].cy)/Math.abs(dot_set[0].y-dot_set[1].y)).toFixed(2);
     //console.log(rate_regression);
@@ -1355,48 +1380,6 @@ $("div").on("mouseover",".point_outliers",function(){
 $("div").on("mouseout",".point_outliers",function(){
     g_body.selectAll(".dot_outliers").remove();
     temp_dot_outliers=[];
-          /*.data(temp_dot_outliers)
-        .enter()
-        .append("circle")
-        .attr("class", "dot_outliers1")
-        .attr("r", 5)
-        .attr("cx", function(d){
-            //console.log(d['cx']);
-            return d['cx'];
-        })
-        .attr("cy", function(d){
-            //console.log(d['cy']);
-            return d['cy'];
-        })
-        .style("fill", function(d) {
-        if(d['var']==legend_var[0])
-            return "rgb(31, 119, 180)";
-        if(d['var']==legend_var[1])
-            return "rgb(255, 127, 14)";
-        if(d['var']==legend_var[2])
-            return "rgb(44, 160, 44)";
-        if(d['var']==legend_var[3])
-            return "rgb(214, 39, 40)";
-        if(d['var']==legend_var[4])
-            return "rgb(148, 103, 189)";
-        if(d['var']==legend_var[5])
-            return "rgb(140, 86, 75)";
-        //return "black";
-        })                
-        // tooltip
-        .on("mouseover", function(d) {
-            tooltip.transition()
-            .duration(200)         // ms delay before appearing
-            .style("opacity", .8); // tooltip appears on mouseover
-            tooltip.html(d['var'] + " " + "<br/>(" + d['x']+ ", " + d['y'] + ")")
-            .style("left", (d3.event.pageX + 10) + "px")  // specify x location
-            .style("top", (d3.event.pageY - 28) + "px");  // specify y location
-        })
-        .on("mouseout", function(d) {
-            tooltip.transition()
-            .duration(500)
-            .style("opacity", 0); // disappear on mouseout
-        });*/
 });
 
 
@@ -1441,17 +1424,16 @@ $("div").on("mouseover",".point_cluster",function(){
             }
          }
         }
-
     }
 
     console.log(temp_dot_cluster);
-        // draw dots
+    // draw dots
     g_body.selectAll(".dot_cluster")
         .data(temp_dot_cluster)
         .enter()
         .append("circle")
         .attr("class", "dot_cluster")
-        .attr("r", 5)
+        .attr("r", 6)
         .attr("cx", function(d){
             //console.log(d['cx']);
             return d['cx'];
@@ -1462,17 +1444,17 @@ $("div").on("mouseover",".point_cluster",function(){
         })
         .style("fill", function(d) {
             if(d['var']==legend_var[0])
-                return "rgb(157, 209, 245)";
+                return "rgb(7, 105, 173)";
             if(d['var']==legend_var[1])
-                return "rgb(250, 185, 127)";
+                return "rbg(240, 115, 5)";
             if(d['var']==legend_var[2])
-                return "rgb(147, 245, 147)";
+                return "rbg(4, 128, 4)";
             if(d['var']==legend_var[3])
-                return "rgb(245, 140, 140)";
+                return "rbg(199, 4, 5)";
             if(d['var']==legend_var[4])
-                return "rbg(217, 180, 250)";
+                return "rbg(105, 15, 186)";
             if(d['var']==legend_var[5])
-                return "rbg(250, 183, 170)";
+                return "rbg(110, 50, 38)";
             return "black"; 
         })
                 
@@ -1483,38 +1465,6 @@ $("div").on("mouseout",".point_cluster",function(){
    //let coordinate = $(this).text().split(',');
     g_body.selectAll(".dot_cluster").remove();
     temp_dot_cluster=[];
-          /*.data(temp_dot_cluster)
-        .enter()
-        .append("circle")
-        .attr("class", "dot_cluster1")
-        .attr("r", 5)
-        .attr("cx", function(d){
-            //console.log(d['cx']);
-            return d['cx'];
-        })
-        .attr("cy", function(d){
-            //console.log(d['cy']);
-            return d['cy'];
-        })
-        .style("fill", function(d) {
-            //console.log(" remove out over ");
-            return "rgb(31, 119, 180)"; 
-        })                
-        // tooltip
-        .on("mouseover", function(d) {
-            tooltip.transition()
-            .duration(200)         // ms delay before appearing
-            .style("opacity", .8); // tooltip appears on mouseover
-            tooltip.html(d['var'] + " " + "<br/>(" + d['x']+ ", " + d['y'] + ")")
-            .style("left", (d3.event.pageX + 10) + "px")  // specify x location
-            .style("top", (d3.event.pageY - 28) + "px");  // specify y location
-        })
-        .on("mouseout", function(d) {
-            tooltip.transition()
-            .duration(500)
-            .style("opacity", 0); // disappear on mouseout
-        });*/
-
 });
 
 
@@ -1555,16 +1505,13 @@ $("#submit").on("click",function(){
             y_array=[];
         }
 
-        var a=[10,11,11,11,12,12,13,14,14,15,17,22];
-        var b=[1, 2, 2, 2, 3, 1, 1, 15, 2, 2, 2, 3, 1, 1, 2];
+        var a=[77,50,71,72,81,94,96,99,67];
+        var b=[82,66,78,34,47,85,99,99,68];
         var c=[17,13,12,15,16,14,16,16,18,19];
         var d=[2,2,3,2,5,1,6];
 
-
-        //var b=[94,73,59,80,93,85,66,79,77,91];
         console.log(jsonArray_all);
-        //console.log(legend_var);
-        //console.log(Outliers_IQR(d));
+        //console.log(Outliers_regression_analysis(a,b));
         //console.log(Outliers_ZScore(d));
 
 
