@@ -57,7 +57,7 @@ var dot_set=[];
 var dot_point={};
 
 // load data
-d3.csv("https://gist.githubusercontent.com/chuikokching/73772b5eda16720151f4f1b8c1ace8c1/raw/a2e9378b6690440d3a5412893ad724a38190a43f/student_GPA_1.csv").then(function(data) {
+d3.csv("https://gist.githubusercontent.com/chuikokching/2dbf88fbfb1232de3f3fc7a211b4f32a/raw/f68449095e03fbb49b7e31bb3a8150f03fd839b7/Income_Life.csv").then(function(data) {
     //console.log(data.columns[0]+ " "+data.columns[1]+ " "+data.columns[2]);
 
     jsonList_copy=data;
@@ -694,7 +694,7 @@ function print_clustering()
             
             for(let q=0;q<result_clustering.centroids.length;q++)
             {
-                text=text+"Cluster sizes of centroid [<span class=\"point_cluster\"><b>"+cluster_data[0].individual +":"+ result_clustering.clusters[q].centroid[0].toFixed(3)+","+result_clustering.clusters[q].centroid[1].toFixed(3)+ "</b></span>] is <b>"+result_clustering.clusters[q].points.length + "</b>. </br>";
+                text=text+"Cluster center [<span class=\"point_cluster\"><b>"+cluster_data[0].individual +":"+ result_clustering.clusters[q].centroid[0].toFixed(3)+","+result_clustering.clusters[q].centroid[1].toFixed(3)+ "</b></span>] with [<b>"+result_clustering.clusters[q].points.length + "</b>] data points. </br>";
             }
             text=text+"</br>";
 
@@ -740,9 +740,9 @@ function print_clustering()
             result_clustering_overall.push(result_clustering);
             text=text+"We observed that there are <b>"+result_clustering.centroids.length+ " clusters</b> for overall data in this dataset, their details are as follows: </br></br> "
             
-            for(let q=0;q<result_clustering.centroids.length;q++)
+            for(let q=0;q<result_clustering_overall[0].clusters.length;q++)
             {
-                text=text+"Cluster [<span class=\"point_cluster_overall_data\"><b>"+result_clustering.var +":"+ result_clustering.clusters[q].centroid[0].toFixed(3)+","+result_clustering.clusters[q].centroid[1].toFixed(3)+ "</b></span>] with [<b>"+result_clustering.clusters[q].points.length + "</b>] data points. </br>";
+                text=text+"Cluster center [<span class=\"point_cluster_overall_data\"><b>"+result_clustering_overall[0].var +":"+ result_clustering_overall[0].clusters[q].centroid[0].toFixed(3)+","+result_clustering_overall[0].clusters[q].centroid[1].toFixed(3)+ "</b></span>] with [<b>"+result_clustering_overall[0].clusters[q].points.length + "</b>] data points. </br>";
             }
             text=text+"</br>";
 
@@ -757,22 +757,45 @@ function print_clustering()
         //!!!!!
         for(let o=0;o<cluster_data.length;o++)
         {
-            result_clustering=kmeans(cluster_data[o].data,3)
-            //console.log(result.centroids);
-            result_clustering['var']=cluster_data[o].individual;
-            result_clustering_all.push(result_clustering);
-            text=text+"We observed that there are <b>"+result_clustering.centroids.length+ " clusters</b> " + "for <b>"+cluster_data[o].individual + "</b>, their details are as follows: </br></br> "
-            
-            for(let q=0;q<result_clustering.centroids.length;q++)
+            //optimal k
+            for(let f=1;f<=5;f++)
             {
-                text=text+"Cluster [<span class=\"point_cluster\"><b>"+cluster_data[o].individual +":"+ result_clustering.clusters[q].centroid[0].toFixed(3)+","+result_clustering.clusters[q].centroid[1].toFixed(3)+ "</b></span>] with [<b>"+result_clustering.clusters[q].points.length + "</b>] data points. </br>";
+                result_clustering=kmeans(cluster_data[o].data,f)
+                //result_clustering['var']="overall_data";
+                
+                for(let t=0;t<result_clustering.clusters.length;t++)
+                {
+                    for(let l=0;l<result_clustering.clusters[t].points.length;l++)
+                    {
+                        sum_sse+=(Math.pow((result_clustering.clusters[t].points[l][0]-result_clustering.clusters[t].centroid[0].toFixed(3)),2))+(Math.pow((result_clustering.clusters[t].points[l][1]-result_clustering.clusters[t].centroid[1].toFixed(3)),2));
+                    }
+
+                }
+                //result_clustering_all.push(result_clustering);  
+                sse.push(Math.log(sum_sse.toFixed(3)).toFixed(3)); 
+                sum_sse=0;
             }
-            text=text+"</br>";
+
+            //console.log(optimal_k(sse));
+            if(optimal_k(sse)>1)
+            {
+                console.log(cluster_data[o].data);
+                result_clustering=kmeans(cluster_data[o].data,optimal_k(sse))
+                result_clustering['var']=cluster_data[o].individual;
+                result_clustering_all.push(result_clustering);
+                text=text+"We observed that there are <b>"+result_clustering.centroids.length+ " clusters</b> " + "for <b>"+cluster_data[o].individual + "</b>, their details are as follows: </br></br> "
+                
+                for(let q=0;q<result_clustering.centroids.length;q++)
+                {
+                    text=text+"Cluster center [<span class=\"point_cluster\"><b>"+cluster_data[o].individual +":"+ result_clustering.clusters[q].centroid[0].toFixed(3)+","+result_clustering.clusters[q].centroid[1].toFixed(3)+ "</b></span>] with [<b>"+result_clustering.clusters[q].points.length + "</b>] data points. </br>";
+                }
+                text=text+"</br>";                
+            }
+            sse=[];
       
         }
     }
 
-    //let result = kmeans(cluster_data[0].data,3);
     console.log(result_clustering_all);
     console.log(result_clustering_overall);
     
@@ -1111,6 +1134,7 @@ function recalculateCentroids(dataSet, labels, k) {
 }
 
 function kmeans(dataset, k, useNaiveSharding = true) {
+    //console.log(dataset.length + " "+ dataset[0].length + " "+ k);
   if (dataset.length && dataset[0].length && dataset.length > k) {
     // Initialize book keeping variables
     let iterations = 0;
@@ -1391,6 +1415,14 @@ $("div").on("mouseover",".line_regression",function(){
                     return "rgb(148, 103, 189)";
                 if(line[i].var==legend_var[5])
                     return "rgb(140, 86, 75)";
+                if(line[i].var==legend_var[6])
+                    return "rgb(247, 129, 230)";
+                if(line[i].var==legend_var[7])
+                    return "rgb(138, 131, 137)";
+                if(line[i].var==legend_var[8])
+                    return "rgb(148, 181, 71)";
+                if(line[i].var==legend_var[9])
+                    return "rgb(41, 167, 171)";                 
                 return "black";                
             })
             .attr("stroke-width", "2px");
@@ -1457,6 +1489,14 @@ $("div").on("mouseover",".point_outliers",function(){
             return "rgb(148, 103, 189)";
         if(d['var']==legend_var[5])
             return "rgb(140, 86, 75)";
+        if(d['var']==legend_var[6])
+            return "rgb(247, 129, 230)";
+        if(d['var']==legend_var[7])
+            return "rgb(138, 131, 137)";
+        if(d['var']==legend_var[8])
+            return "rgb(148, 181, 71)";
+        if(d['var']==legend_var[9])
+            return "rgb(41, 167, 171)";    
         return "black";
     })
 
@@ -1474,11 +1514,62 @@ var temp_dot_cluster_overall=[];
 //Point cluster_mouseover for overall data
 $("div").on("mouseover",".point_cluster_overall_data",function(){
     let coordinate = $(this).text().split(/[,:]/);
-    console.log(coordinate);
+    //console.log(coordinate);
+    let dataset={};
+
+    let temp_point={};
+
+    for(let k =0;k<result_clustering_overall[0].clusters.length;k++)
+    {
+        if((result_clustering_overall[0].var==coordinate[0])&&
+        (result_clustering_overall[0].clusters[k].centroid[0].toFixed(3)==parseFloat(coordinate[1]))&&
+        (result_clustering_overall[0].clusters[k].centroid[1].toFixed(3)==parseFloat(coordinate[2])))
+        {
+            dataset['point'] = result_clustering_overall[0].clusters[k].points;
+            dataset['var'] = coordinate[0];
+
+            for(let i=0;i<dataset.point.length;i++)
+            {
+                for(let z=0;z<dot_set.length;z++)
+                {
+                    if((dataset.point[i][0]==dot_set[z].x) && (dataset.point[i][1]==dot_set[z].y))
+                    {
+                        temp_point['var']="overall";
+                        temp_point['x']=dot_set[z].x;
+                        temp_point['cx']=dot_set[z].cx;
+                        temp_point['y']=dot_set[z].y;
+                        temp_point['cy']=dot_set[z].cy;
+                        temp_dot_cluster_overall.push(temp_point);
+                        temp_point={};
+                    }
+
+                }
+            }
+        }
+    }
+    console.log(temp_dot_cluster_overall);
+    // draw dots
+    g_body.selectAll(".dot_cluster_overall")
+        .data(temp_dot_cluster_overall)
+        .enter()
+        .append("circle")
+        .attr("class", "dot_cluster_overall")
+        .attr("r", 6)
+        .attr("cx", function(d){
+            //console.log(d['cx']);
+            return d['cx'];
+        })
+        .attr("cy", function(d){
+            //console.log(d['cy']);
+            return d['cy'];
+        })
+        .style("fill", "black")  
+
 });
 
-$("div").on("mouseout",".point_cluster_overall_data",function(){
 
+$("div").on("mouseout",".point_cluster_overall_data",function(){
+    g_body.selectAll(".dot_cluster_overall").remove();
     temp_dot_cluster_overall=[];
 });
 
@@ -1495,14 +1586,13 @@ $("div").on("mouseover",".point_cluster",function(){
     {
         for(let k=0;k<result_clustering_all[z].clusters.length;k++)
         {
-                    //console.log(k+ "  "+ result_clustering.clusters[k].centroid[0].toFixed(3)+" :  "+result_clustering.clusters[k].centroid[1].toFixed(3)+"        "+coordinate[0] +" : "+ coordinate[1] );
+        //console.log(k+ "  "+ result_clustering.clusters[k].centroid[0].toFixed(3)+" :  "+result_clustering.clusters[k].centroid[1].toFixed(3)+"        "+coordinate[0] +" : "+ coordinate[1] );
         if((result_clustering_all[z].var==coordinate[0])&&
             (result_clustering_all[z].clusters[k].centroid[0].toFixed(3)==parseFloat(coordinate[1]))&&
             (result_clustering_all[z].clusters[k].centroid[1].toFixed(3)==parseFloat(coordinate[2])))
         {
             dataset['point'] = result_clustering_all[z].clusters[k].points;
             dataset['var'] = coordinate[0];
-
 
             for(let i=0;i<dataset.point.length;i++)
             {
