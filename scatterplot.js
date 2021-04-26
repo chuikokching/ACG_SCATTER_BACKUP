@@ -57,7 +57,7 @@ var dot_set=[];
 var dot_point={};
 
 // load data
-d3.csv("https://gist.githubusercontent.com/chuikokching/2dbf88fbfb1232de3f3fc7a211b4f32a/raw/f68449095e03fbb49b7e31bb3a8150f03fd839b7/Income_Life.csv").then(function(data) {
+d3.csv("https://gist.githubusercontent.com/chuikokching/057e25c2956070d311b2809e5120c4a9/raw/b8fd83a6d57d347216726abe443ca71435787851/penguins.csv").then(function(data) {
     //console.log(data.columns[0]+ " "+data.columns[1]+ " "+data.columns[2]);
 
     jsonList_copy=data;
@@ -289,7 +289,15 @@ function print_correlation()
         }
         else
         {
-            text = text +"We observed that there is a "+correlation_coefficient_association(arr_all_x,arr_all_y)+" "+correlation_coefficient_strength(arr_all_x,arr_all_y)+" linear correlation between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b> for overall data. </br>";
+            text = text +"We observed that there is a "+correlation_coefficient_association(arr_all_x,arr_all_y)+" "+correlation_coefficient_strength(arr_all_x,arr_all_y)+" linear correlation between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b> for overall data. ";
+            if(correlation_coefficient(arr_all_x,arr_all_y)>0)
+            {
+                text = text +"That means in terms of overall data, as <b>"+x_axis_title+"</b> increases, so does "+variables+"'s <b>"+y_axis_title+"</b>. </br>";
+            }
+            else
+            {
+                text = text +"That means in terms of overall data, as <b>"+x_axis_title+"</b> decreases, so does "+variables+"'s <b>"+y_axis_title+"</b>. </br>";
+            }
         }
     }
     else
@@ -328,8 +336,8 @@ function print_correlation()
                 
         }
         //console.log(min_pos + " : " + max_pos + " min and max");
-        text = text + "<span class=\"line_regression\"><b>"+variables+ " "+var_linear[max_pos].var + "</b></span> has a <b>"+var_linear[max_pos].strength+" "+var_linear[max_pos].association+"</b> (<b>"+max+"</b>) linear correlation. </br>";
-        text = text + "<span class=\"line_regression\"><b>"+variables+ " "+var_linear[min_pos].var + "</b></span> has a <b>"+var_linear[min_pos].strength+" "+var_linear[min_pos].association+"</b> (<b>"+min+"</b>) linear correlation. </br>";
+        text = text + "<span class=\"line_regression\"><b>"+variables+ " "+var_linear[max_pos].var + "</b></span> has a <b>"+var_linear[max_pos].strength+" "+var_linear[max_pos].association+"</b> (<b>"+max+"</b>) linear correlation. (max)</br>";
+        text = text + "<span class=\"line_regression\"><b>"+variables+ " "+var_linear[min_pos].var + "</b></span> has a <b>"+var_linear[min_pos].strength+" "+var_linear[min_pos].association+"</b> (<b>"+min+"</b>) linear correlation. (min)</br>";
 
 
         arr_all_y=[];
