@@ -2,13 +2,13 @@
 
 var margin = {top: 50, right: 50, bottom: 60, left: 70},
     width = 1050 - margin.left - margin.right,
-    height = 700 - margin.top - margin.bottom;
+    height = 780 - margin.top - margin.bottom;
 
 
 var svg=d3.select("#scatter_chart")
     .append("svg")
     .attr("width",1050)
-    .attr("height",700)
+    .attr("height",800)
 
 var g_body = svg.append("g").attr("transform","translate("+ margin.left+","+margin.top+")");
 
@@ -22,7 +22,7 @@ var g_title= svg.append("g")
 
 //title of x_axis
 var g_x_axis_title = svg.append("g")
-    .attr("transform","translate("+490+","+680+")")
+    .attr("transform","translate("+490+","+780+")")
     .append("text")
     .attr("font-size", 19)
     .attr("fill","#1f375a")
@@ -45,6 +45,7 @@ var tooltip = d3.select("body").append("div")
 var chart_title="Scatterplot Chart";
 var x_axis_title="";
 var y_axis_title="";
+var z_axis_title="";
 var variables="";
 var legend_var = [];
 
@@ -57,7 +58,7 @@ var dot_set=[];
 var dot_point={};
 
 // load data
-d3.csv("https://gist.githubusercontent.com/chuikokching/057e25c2956070d311b2809e5120c4a9/raw/b8fd83a6d57d347216726abe443ca71435787851/penguins.csv").then(function(data) {
+d3.csv("https://gist.githubusercontent.com/chuikokching/73772b5eda16720151f4f1b8c1ace8c1/raw/a2e9378b6690440d3a5412893ad724a38190a43f/student_GPA_1.csv").then(function(data) {
     //console.log(data.columns[0]+ " "+data.columns[1]+ " "+data.columns[2]);
 
     jsonList_copy=data;
@@ -68,6 +69,7 @@ d3.csv("https://gist.githubusercontent.com/chuikokching/057e25c2956070d311b2809e
     variables = data.columns[0];
     x_axis_title = data.columns[1];
     y_axis_title = data.columns[2];
+    z_axis_title = data.columns[3];
 
     g_title.text(chart_title);
     g_x_axis_title.text(x_axis_title);
@@ -135,12 +137,24 @@ d3.csv("https://gist.githubusercontent.com/chuikokching/057e25c2956070d311b2809e
 
         // tooltip
         .on("mouseover", function(d) {
-            tooltip.transition()
+            if(z_axis_title!=null)
+            {
+                tooltip.transition()
                 .duration(200)         // ms delay before appearing
                 .style("opacity", .8); // tooltip appears on mouseover
-            tooltip.html(d[variables] + " " + "<br/>(" + xValue(d)+ ", " + yValue(d) + ")")
+            tooltip.html(d[variables] + " " + "<br/>(" + xValue(d)+ ", " + yValue(d) + ")<br/>"+d[z_axis_title])
                 .style("left", (d3.event.pageX + 10) + "px")  // specify x location
                 .style("top", (d3.event.pageY - 28) + "px");  // specify y location
+            }
+            else{
+                            tooltip.transition()
+                .duration(200)         // ms delay before appearing
+                .style("opacity", .8); // tooltip appears on mouseover
+            tooltip.html(d[variables] + " " + "<br/>(" + xValue(d)+ ", " + yValue(d) + ")<br/>")
+                .style("left", (d3.event.pageX + 10) + "px")  // specify x location
+                .style("top", (d3.event.pageY - 28) + "px");  // specify y location
+            }
+
         })
         .on("mouseout", function(d) {
             tooltip.transition()
@@ -157,12 +171,14 @@ d3.csv("https://gist.githubusercontent.com/chuikokching/057e25c2956070d311b2809e
         .attr("class", "legend")
         .attr("transform", function(d, i) { return "translate(10," + (i+1) * 15 + ")"; });
 
+
     // draw legend colored rectangles
     legend.append("rect")
         .attr("x", width )
         .attr("width", 13)
         .attr("height", 12)
         .style("fill", colors);
+
 
     // draw legend text
     legend.append("text")
@@ -171,6 +187,7 @@ d3.csv("https://gist.githubusercontent.com/chuikokching/057e25c2956070d311b2809e
         .attr("dy", ".15em")
         .style("text-anchor", "end")
         .text(function(d,i) { return d;})
+
 
 });
 
@@ -199,7 +216,17 @@ var line=[];
 
 function s(a,b){return a-b;}
 
-//traverse array
+
+function print_individual(){
+    var text ="There are <b>"+legend_var.length +" "+variables+"</b> in this dataset, they are as follows; </br>";
+    for(let i=0;i<legend_var.length;i++)
+    {
+        text+="<span class=\"individual\"><b>"+legend_var[i]+"</b></span> ";
+    }
+    return text+"</br></br>";
+}
+
+
 function print_correlation()
 {
     var min,min_pos,max,max_pos;
@@ -268,8 +295,16 @@ function print_correlation()
                 if((var_linear[0].value_correlation<=-0.7))
                     text= text+"<b>strong ";
             }   
-            text = text + var_linear[0].association+"</b> linear correlation (<b>"+Math.abs(var_linear[0].value_correlation)+"</b>) between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b>. </br>";
+            text = text + var_linear[0].association+"</b> linear correlation (<b>"+Math.abs(var_linear[0].value_correlation)+"</b>) between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b>. ";
 
+            if(var_linear[0].value_correlation>0)
+            {
+                text = text +"That means in terms of overall data, as <b>"+x_axis_title+"</b> increases, so does <b>"+y_axis_title+"</b>. </br>";
+            }
+            else
+            {
+                text = text +"That means in terms of overall data, as <b>"+x_axis_title+"</b> decreases, so does <b>"+y_axis_title+"</b>. </br>";
+            }
             arr_all_y=[];
             regression_copy=Outliers_regression_analysis(var_linear[0].x_array,var_linear[0].y_array);
             temp_line['var']=var_linear[0].var;
@@ -292,11 +327,11 @@ function print_correlation()
             text = text +"We observed that there is a "+correlation_coefficient_association(arr_all_x,arr_all_y)+" "+correlation_coefficient_strength(arr_all_x,arr_all_y)+" linear correlation between <b>"+ x_axis_title + "</b> and <b>"+ y_axis_title+ "</b> for overall data. ";
             if(correlation_coefficient(arr_all_x,arr_all_y)>0)
             {
-                text = text +"That means in terms of overall data, as <b>"+x_axis_title+"</b> increases, so does "+variables+"'s <b>"+y_axis_title+"</b>. </br>";
+                text = text +"That means in terms of overall data, as <b>"+x_axis_title+"</b> increases, so does <b>"+y_axis_title+"</b>. </br>";
             }
             else
             {
-                text = text +"That means in terms of overall data, as <b>"+x_axis_title+"</b> decreases, so does "+variables+"'s <b>"+y_axis_title+"</b>. </br>";
+                text = text +"That means in terms of overall data, as <b>"+x_axis_title+"</b> decreases, so does <b>"+y_axis_title+"</b>. </br>";
             }
         }
     }
@@ -311,7 +346,7 @@ function print_correlation()
     //console.log(var_weak+ " weak");
     //console.log(var_non_linear + " var_non_linear");
 
-    //console.log(var_linear);
+    console.log(var_linear);
 
     if(var_linear.length!=0&&var_linear.length>1)
     {     
@@ -381,7 +416,7 @@ function print_correlation()
 
         if(var_non_linear.length!=0)
         {
-            text=text + "In addition, there are <b>" + var_non_linear.length+ " "+variables+ "</b> where there is no linear correlation.</br>";
+            text=text + "In addition, there are <b>" + var_non_linear.length+ " "+variables+" ("+var_non_linear+ ")</b> where there is no linear correlation.</br>";
         }
     }
     if(var_linear.length==0&&var_non_linear.length!=0)
@@ -577,7 +612,7 @@ function print_outliers()
                         }
                     }
                     console.log(outliers_y_axis + " no linear relationship ZScore!!!!!!!!!!!");
-                    outliers_y_axis= Outliers_IQR(jsonArray_all[b].y_array);
+                    /*outliers_y_axis= Outliers_IQR(jsonArray_all[b].y_array);
                     if(outliers_y_axis.length!=0)
                     {
                         for(let f=0;f<outliers_y_axis.length;f++)
@@ -609,7 +644,7 @@ function print_outliers()
                             }
                         }
                     }
-                    console.log(outliers_y_axis + " no linear relationship IQR!!!!!!!!!!!!!");
+                    console.log(outliers_y_axis + " no linear relationship IQR!!!!!!!!!!!!!");*/
 
                 }
             }                      
@@ -1364,15 +1399,35 @@ function min_y(){
 
 //Info function
 $("#infos").on("click",function(){
-   Swal.fire(
-      'A description of the association in a scatterplot should always include a description of the form, direction, ' +'and strength of the association, along with the presence of any outliers.',
-       'Form: Is the association linear or nonlinear?\n' + '<br/>'+
-       'Direction: Is the association positive or negative?\n' +
-       'Strength: Does the association appear to be strong, moderately strong, or weak?\n' + '<br/>'+
-       'Outliers: Do there appear to be any data points that are unusually far away from the general pattern?',
-       'info'
-   );
+Swal.fire({
+  title: 'Analysis Tool Instructions',
+  width: 700,
+  padding: '2em',
+  showConfirmButton: false,
+  html:'<b>Text Structure</b></br>'+'<b>1. Overview: rough description of the dataset</b></br>'+'<b>2. Correlation: linear correlation between variables x and y</b></br>'+'<b>3. Outliers detection for each individual.</b></br>'+'<b>4. Clustering group of dataset for overall data and each individual.</b></br>'
+  });
 });
+
+//Upload function
+$("#upload").on("click",function(){
+Swal.fire({
+  inputLabel: 'URL address',
+  input: 'text',
+}).then((result) => 
+{
+  if (result.value) {
+    const answers = JSON.stringify(result.value)
+    /*Swal.fire({
+      title: 'All done!',
+      html: `Your url:<pre><code>${answers}</code></pre>`,
+    })*/
+    console.log(answers);
+  }
+})
+
+
+});
+
 
 //Line regression
 $("div").on("mouseover",".line_regression",function(){
@@ -1433,7 +1488,7 @@ $("div").on("mouseover",".line_regression",function(){
                     return "rgb(41, 167, 171)";                 
                 return "black";                
             })
-            .attr("stroke-width", "2px");
+            .attr("stroke-width", "5px");
         }
     }
 })
@@ -1687,17 +1742,16 @@ $("#submit").on("click",function(){
             y_array=[];
         }
 
-        //var a=[77,50,71,72,81,94,96,99,67];
-        //var b=[82,66,78,34,47,85,99,99,68];
-       // var c=[17,13,12,15,16,14,16,16,18,19];
-        //var d=[2,2,3,2,5,1,6];
-
         console.log(jsonArray_all);
         //console.log(Outliers_regression_analysis(a,b));
         //console.log(Outliers_ZScore(d));
 
 
         $(".description").html("Descriptions: "+"<br/>"+"<br/>"
+            +
+            "<b>Individuals:</b> </br></br>"
+            +
+            print_individual()
             +
             "<b>Overview:</b>  </br> </br>"
             +
