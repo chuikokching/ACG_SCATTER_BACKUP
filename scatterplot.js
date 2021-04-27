@@ -193,7 +193,7 @@ d3.csv("https://gist.githubusercontent.com/chuikokching/73772b5eda16720151f4f1b8
         var plot_individual=d;
         // Hide or show the elements
         var plot_class = ".dot_"+plot_individual;
-        console.log(d3.selectAll(plot_class).style("display"));
+        //console.log(d3.selectAll(plot_class).style("display"));
         if(d3.selectAll(plot_class).style("display")=="inline")
         {
             d3.selectAll(plot_class).style("display", 'none');
@@ -365,7 +365,7 @@ function print_correlation()
     //console.log(var_weak+ " weak");
     //console.log(var_non_linear + " var_non_linear");
 
-    console.log(var_linear);
+    //console.log(var_linear);
 
     if(var_linear.length!=0&&var_linear.length>1)
     {     
@@ -1423,7 +1423,7 @@ Swal.fire({
   width: 700,
   padding: '2em',
   showConfirmButton: false,
-  html:'<b>Text Structure</b></br>'+'<b>1. Overview: rough description of the dataset</b></br>'+'<b>2. Correlation: linear correlation between variables x and y</b></br>'+'<b>3. Outliers detection for each individual.</b></br>'+'<b>4. Clustering group of dataset for overall data and each individual.</b></br>'
+  html:'<span style=\"font-size:23px"><b>Text Structure as follows:</b></span></br>'+'<b>1. Individuals: how many individuals this dataset has.</b></br>'+'<b>2. Overview: rough description of the dataset.</b></br>'+'<b>3. Correlation: linear correlation between variables x and y.</b></br>'+'<b>4. Outliers detection for each individual.</b></br>'+'<b>5. Clustering group of dataset for overall data and each individual.</b></br>'
   });
 });
 
@@ -1726,7 +1726,7 @@ $("div").on("mouseout",".point_cluster",function(){
 
 $("div").on("click",".individual",function(){
     let coordinate = $(this).text();
-    console.log(coordinate);
+    //console.log(coordinate);
 });
 
 
