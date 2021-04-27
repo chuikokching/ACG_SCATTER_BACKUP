@@ -113,7 +113,9 @@ d3.csv("https://gist.githubusercontent.com/chuikokching/73772b5eda16720151f4f1b8
         .data(data)
         .enter()
         .append("circle")
-        .attr("class", "dot")
+        .attr("class", function(d){
+            return "dot_"+d[variables];
+        })
         .attr("r", 5)
         .attr("cx", function(d) { 
             //console.log(x(xValue(d)) + " : X " + xValue(d) );
@@ -186,7 +188,24 @@ d3.csv("https://gist.githubusercontent.com/chuikokching/73772b5eda16720151f4f1b8
         .attr("y", 9)
         .attr("dy", ".15em")
         .style("text-anchor", "end")
-        .text(function(d,i) { return d;})
+        .on("click",function(d,i){
+        // Determine if current line is visible
+        var plot_individual=d;
+        // Hide or show the elements
+        var plot_class = ".dot_"+plot_individual;
+        console.log(d3.selectAll(plot_class).style("display"));
+        if(d3.selectAll(plot_class).style("display")=="inline")
+        {
+            d3.selectAll(plot_class).style("display", 'none');
+        }
+        else
+        {
+            d3.selectAll(plot_class).style("display", 'inline');
+        }
+        })
+        .text(function(d,i) { 
+            return d;
+        })
 
 
 });
@@ -218,7 +237,7 @@ function s(a,b){return a-b;}
 
 
 function print_individual(){
-    var text ="There are <b>"+legend_var.length +" "+variables+"</b> in this dataset, they are as follows; </br>";
+    var text ="There are <b>"+legend_var.length +" "+variables+"</b> in this dataset, they are as follows: </br>";
     for(let i=0;i<legend_var.length;i++)
     {
         text+="<span class=\"individual\"><b>"+legend_var[i]+"</b></span> ";
@@ -1705,6 +1724,11 @@ $("div").on("mouseout",".point_cluster",function(){
 });
 
 
+$("div").on("click",".individual",function(){
+    let coordinate = $(this).text();
+    console.log(coordinate);
+});
+
 
 //Submit function
 $("#submit").on("click",function(){
@@ -1747,7 +1771,7 @@ $("#submit").on("click",function(){
         //console.log(Outliers_ZScore(d));
 
 
-        $(".description").html("Descriptions: "+"<br/>"+"<br/>"
+        $(".description").html("<span style=\"font-size:30px\"><b><u><em>Descriptions:</em></u></b></span> "+"<br/>"+"<br/>"
             +
             "<b>Individuals:</b> </br></br>"
             +
