@@ -58,7 +58,7 @@ var dot_set=[];
 var dot_point={};
 
 // load data
-d3.csv("https://gist.githubusercontent.com/chuikokching/73772b5eda16720151f4f1b8c1ace8c1/raw/a2e9378b6690440d3a5412893ad724a38190a43f/student_GPA_1.csv").then(function(data) {
+d3.csv("").then(function(data) {
     //console.log(data.columns[0]+ " "+data.columns[1]+ " "+data.columns[2]);
 
     jsonList_copy=data;
@@ -99,7 +99,6 @@ d3.csv("https://gist.githubusercontent.com/chuikokching/73772b5eda16720151f4f1b8
     g_body.append("g")
         .attr("class", "axis y-axis")
         .call(d3.axisLeft(y));
-
 
     //create color scale
     var cValue = function(d) {
@@ -433,9 +432,11 @@ function print_correlation()
 
         console.log(line);
 
+        text = text + "In conslution , there are <b>"+ var_linear.length + " " + variables +" </b> where there is a linear correlation between "+x_axis_title+" and "+ y_axis_title +".</br>"
+
         if(var_non_linear.length!=0)
         {
-            text=text + "In addition, there are <b>" + var_non_linear.length+ " "+variables+" ("+var_non_linear+ ")</b> where there is no linear correlation.</br>";
+            text=text + "In addition, there are <b>" + var_non_linear.length+ " "+variables+" </b> where there is no linear correlation between "+x_axis_title+" and "+ y_axis_title +".</br>";
         }
     }
     if(var_linear.length==0&&var_non_linear.length!=0)
@@ -556,7 +557,7 @@ function print_outliers()
             {
                 if(var_non_linear[k]==jsonArray_all[b].var)
                 {
-                    /*outliers_array_copy= jsonArray_all[b].x_array;
+                    outliers_array_copy= jsonArray_all[b].x_array;
                     outliers_x_axis= Outliers_ZScore(jsonArray_all[b].x_array);
                     if(outliers_x_axis.length!=0)
                     {
@@ -569,14 +570,30 @@ function print_outliers()
                                     point["var"]=jsonArray_all[b].var;
                                     point["x"]=jsonArray_all[b].x_array[a];
                                     point["y"]=jsonArray_all[b].y_array[a];
+                                    point["position"]=a;
+                                    if(outliers_array.length==0)
                                     outliers_array.push(point);
+                                    else
+                                    {
+                                        for(let z=0;z<outliers_array.length;z++)
+                                        {
+                                             //console.log(point.position+ " "+ point.var + " "+outliers_array[z].position + " " + outliers_array[z].var);
+                                            if(point.position==outliers_array[z].position&&point.var==outliers_array[z].var)
+                                            {
+                                                set = 1;
+                                            }                                               
+                                        }
+                                        if(set ==0)
+                                            outliers_array.push(point);                                      
+                                    }
                                     point={};
+                                    set = 0;
                                 }
                             }
                         }
                     }
 
-                    outliers_x_axis= Outliers_IQR(jsonArray_all[b].x_array);
+                    /*outliers_x_axis= Outliers_IQR(jsonArray_all[b].x_array);
                     if(outliers_x_axis.length!=0)
                     {
                         for(let f=0;f<outliers_x_axis.length;f++)
@@ -631,7 +648,7 @@ function print_outliers()
                         }
                     }
                     console.log(outliers_y_axis + " no linear relationship ZScore!!!!!!!!!!!");
-                    /*outliers_y_axis= Outliers_IQR(jsonArray_all[b].y_array);
+                    outliers_y_axis= Outliers_IQR(jsonArray_all[b].y_array);
                     if(outliers_y_axis.length!=0)
                     {
                         for(let f=0;f<outliers_y_axis.length;f++)
@@ -663,7 +680,7 @@ function print_outliers()
                             }
                         }
                     }
-                    console.log(outliers_y_axis + " no linear relationship IQR!!!!!!!!!!!!!");*/
+                    console.log(outliers_y_axis + " no linear relationship IQR!!!!!!!!!!!!!");
 
                 }
             }                      
@@ -820,7 +837,7 @@ function print_clustering()
         for(let o=0;o<cluster_data.length;o++)
         {
             //optimal k
-            for(let f=1;f<=5;f++)
+            for(let f=1;f<=6;f++)
             {
                 result_clustering=kmeans(cluster_data[o].data,f)
                 //result_clustering['var']="overall_data";
@@ -1451,11 +1468,10 @@ Swal.fire({
 //Line regression
 $("div").on("mouseover",".line_regression",function(){
     let coordinate = $(this).text().split(' ');
-    //console.log(line);
-    //console.log(dot_set);
+
     let x1,y1,x2,y2;
     let rate_regression=(Math.abs(dot_set[0].cy-dot_set[1].cy)/Math.abs(dot_set[0].y-dot_set[1].y)).toFixed(2);
-    //console.log(rate_regression);
+
     for(let i=0;i<line.length;i++)
     {
         if(line[i].var==coordinate[1])
@@ -1739,39 +1755,40 @@ $("#submit").on("click",function(){
         "y_axis_title":y_axis_title,
         "array":jsonList_copy
     };*/
+        //name of individuals
+    legend_var = unique(legend_var);
+    
+    var txt = legend_var[0];
 
-        legend_var = unique(legend_var);
+    for(let i=1;i<=legend_var.length;i++)
+    {
         
-        var txt = legend_var[0];
-
-        for(let i=1;i<=legend_var.length;i++)
+        for(let j=0;j<jsonList_copy.length;j++)
         {
             
-            for(let j=0;j<jsonList_copy.length;j++)
+            if(txt==jsonList_copy[j][variables])
             {
-                
-                if(txt==jsonList_copy[j][variables])
-                {
-                    x_array.push(jsonList_copy[j][x_axis_title]);
-                    y_array.push(jsonList_copy[j][y_axis_title]);
-                }
+                x_array.push(jsonList_copy[j][x_axis_title]);
+                y_array.push(jsonList_copy[j][y_axis_title]);
             }
-            jsonList_temp["var"]=txt;
-            jsonList_temp["x_array"]=x_array;
-            jsonList_temp["y_array"]=y_array;
-            jsonArray_all.push(jsonList_temp);
-            jsonList_temp={};
-            txt=legend_var[i];
-            x_array=[];
-            y_array=[];
         }
+        jsonList_temp["var"]=txt;
+        jsonList_temp["x_array"]=x_array;
+        jsonList_temp["y_array"]=y_array;
+        jsonArray_all.push(jsonList_temp);
+        jsonList_temp={};
+        txt=legend_var[i];
+        x_array=[];
+        y_array=[];
+    }
 
         console.log(jsonArray_all);
         //console.log(Outliers_regression_analysis(a,b));
         //console.log(Outliers_ZScore(d));
 
 
-        $(".description").html("<span style=\"font-size:30px\"><b><u><em>Descriptions:</em></u></b></span> "+"<br/>"+"<br/>"
+        $(".description").html(
+            "<span style=\"font-size:30px\"><b><u><em>Descriptions:</em></u></b></span> "+"<br/>"+"<br/>"
             +
             "<b>Individuals:</b> </br></br>"
             +
