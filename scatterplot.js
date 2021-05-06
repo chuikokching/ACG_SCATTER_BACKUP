@@ -58,7 +58,7 @@ var dot_set=[];
 var dot_point={};
 
 // load data
-d3.csv("").then(function(data) {
+d3.csv("https://gist.githubusercontent.com/chuikokching/73772b5eda16720151f4f1b8c1ace8c1/raw/a2e9378b6690440d3a5412893ad724a38190a43f/student_GPA_1.csv").then(function(data) {
     //console.log(data.columns[0]+ " "+data.columns[1]+ " "+data.columns[2]);
 
     jsonList_copy=data;
@@ -205,8 +205,6 @@ d3.csv("").then(function(data) {
         .text(function(d,i) { 
             return d;
         })
-
-
 });
 
 //remove repeatable values in array
@@ -477,7 +475,6 @@ function print_outliers()
                         value=jsonArray_all[b].x_array[a]*regression_copy[0]+regression_copy[1];
                         if(rate(jsonArray_all[b].y_array[a],value)=="outlier")
                         {
-                            //console.log("outliers:  value "+ value + " y: "+ jsonArray_all[b].y_array[a] + " x: "+ jsonArray_all[b].x_array[a]);
                                 point["var"]=jsonArray_all[b].var;
                                 point["x"]=jsonArray_all[b].x_array[a];
                                 point["y"]=jsonArray_all[b].y_array[a];
@@ -592,7 +589,7 @@ function print_outliers()
                             }
                         }
                     }
-
+                    console.log(outliers_x_axis + " x-axis no linear relationship ZScore!!!!!!!!!!!");
                     /*outliers_x_axis= Outliers_IQR(jsonArray_all[b].x_array);
                     if(outliers_x_axis.length!=0)
                     {
@@ -647,7 +644,7 @@ function print_outliers()
                             }
                         }
                     }
-                    console.log(outliers_y_axis + " no linear relationship ZScore!!!!!!!!!!!");
+                    console.log(outliers_y_axis + " y-axis no linear relationship ZScore!!!!!!!!!!!");
                     outliers_y_axis= Outliers_IQR(jsonArray_all[b].y_array);
                     if(outliers_y_axis.length!=0)
                     {
@@ -688,13 +685,30 @@ function print_outliers()
     }
     if(outliers_array.length!=0)
     {
+        let individual_outlier=[];
+
         text = text + " There are "+outliers_array.length + " outliers detected, they are as follows: </br>";
 
         for(let h=0;h<outliers_array.length;h++)
         {
-            text = text + "[<span class=\"point_outliers\"><b>"+ outliers_array[h].var +":"+ outliers_array[h].x+ ","+outliers_array[h].y + "</span></b>]. ";
+            individual_outlier.push(outliers_array[h].var);
         }
 
+        individual_outlier= unique(individual_outlier);
+        //console.log(individual_outlier);
+
+        for(let k=0;k<individual_outlier.length;k++)
+        {
+            text = text +"<b>"+individual_outlier[k] +"</b>:</br>";
+            for(let h=0;h<outliers_array.length;h++)
+            {
+                if(individual_outlier[k]==outliers_array[h].var)
+                {
+                    text = text + "[<span class=\"point_outliers\"><b>"+ outliers_array[h].var +":"+ outliers_array[h].x+ ","+outliers_array[h].y + "</span></b>]. ";
+                }
+            }
+            text = text +"</br></br>";            
+        }
         text = text +"</br>";
     }
     else
@@ -975,10 +989,6 @@ function Outliers_regression_analysis(arr_x,arr_y)
     {
         sum_y+=(arr_y[k]-mean_y)*(arr_y[k]-mean_y);
     }      
-
-    //console.log(sum_x + " x ||"  + "  y: "+sum_y);
-
-
     l=correlation_coefficient(arr_x,arr_y)*Math.sqrt(sum_y/(arr_y.length-1))/Math.sqrt(sum_x/(arr_x.length-1));
     regression.push(l);
 
@@ -1013,15 +1023,11 @@ function Outliers_ZScore(arr)
 //Outliers Range_IQR
 function Outliers_IQR(arr) {
     const size = arr.length;
-
     let q1, q3;
-
     if (size < 2) {
         return arr;
     }
-
     const sortedCollection = arr.slice().sort((a, b) => a - b);
-
 
     if ((size - 1) / 4 % 1 === 0 || size / 4 % 1 === 0) {
         q1 = 1 / 2 * (sortedCollection[Math.floor(size / 4) - 1] + sortedCollection[Math.floor(size / 4)]);
@@ -1032,11 +1038,11 @@ function Outliers_IQR(arr) {
     }
 
     const iqr = q3 - q1;
-    const maxValue = q3 + iqr * 1.5;
-    const minValue = q1 - iqr * 1.5;
+    const upper_bounds = q3 + iqr * 1.5;
+    const lower_bounds = q1 - iqr * 1.5;
 
     var result=sortedCollection.filter((x)=>{
-        return (x>maxValue)||(x<minValue);
+        return (x>upper_bounds)||(x<lower_bounds);
     });
     return result;
 };
@@ -1212,7 +1218,7 @@ function recalculateCentroids(dataSet, labels, k) {
   return newCentroidList;
 }
 
-function kmeans(dataset, k, useNaiveSharding = true) {
+function kmeans(dataset, k) {
     //console.log(dataset.length + " "+ dataset[0].length + " "+ k);
   if (dataset.length && dataset[0].length && dataset.length > k) {
     // Initialize book keeping variables
@@ -1220,11 +1226,9 @@ function kmeans(dataset, k, useNaiveSharding = true) {
     let oldCentroids, labels, centroids;
 
     // Initialize centroids randomly
-    if (useNaiveSharding) {
-      centroids = getRandomCentroidsNaiveSharding(dataset, k);
-    } else {
-      centroids = getRandomCentroids(dataset, k);
-    }
+   centroids = getRandomCentroids(dataset, k);
+    //console.log(centroids);
+
 
     // Run the main k-means algorithm
     while (!shouldStop(oldCentroids, centroids, iterations)) {
@@ -1336,21 +1340,14 @@ function correlation_coefficient(arr_x,arr_y)
         return "Error, length of array doesn't match!"
     else
     {
-        var r=0;
+        var r=0,sum=0,sum_x=0,sum_y=0;
         var arr_x_aver=average(arr_x);
         var arr_y_aver=average(arr_y);
-        var sum=0;
-        var sum_x=0;
-        var sum_y=0;
-        //console.log(arr_x_aver+ " :::: "+ arr_y_aver);
 
         for(var i=0;i<arr_x.length;i++)
         {
             sum+=(arr_x[i]-arr_x_aver)*(arr_y[i]-arr_y_aver)
         }
-
-        //console.log(sum);
-
         for(var i=0;i<arr_x.length;i++)
         {
             sum_x+=(arr_x[i]-arr_x_aver)*(arr_x[i]-arr_x_aver)
@@ -1360,11 +1357,7 @@ function correlation_coefficient(arr_x,arr_y)
         {
             sum_y+=(arr_y[k]-arr_y_aver)*(arr_y[k]-arr_y_aver)
         }        
-
-        //console.log(sum_x + " :::: "+ sum_y);
-
         r=(sum/Math.sqrt(sum_x*sum_y)).toFixed(3);
-        //console.log(r + " value of r");
         return r;
     }
 }
@@ -1452,12 +1445,14 @@ Swal.fire({
 }).then((result) => 
 {
   if (result.value) {
-    const answers = JSON.stringify(result.value)
+    //const answers = JSON.stringify(result.value)
     /*Swal.fire({
       title: 'All done!',
       html: `Your url:<pre><code>${answers}</code></pre>`,
     })*/
-    console.log(answers);
+
+    console.log(result.value);
+
   }
 })
 
@@ -1785,7 +1780,6 @@ $("#submit").on("click",function(){
         console.log(jsonArray_all);
         //console.log(Outliers_regression_analysis(a,b));
         //console.log(Outliers_ZScore(d));
-
 
         $(".description").html(
             "<span style=\"font-size:30px\"><b><u><em>Descriptions:</em></u></b></span> "+"<br/>"+"<br/>"
